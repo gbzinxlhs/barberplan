@@ -9,9 +9,15 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const subdomain = host.split(".")[0];
   const isLocalhost = host.includes("localhost");
-  const isRootDomain = subdomain === "www" || subdomain === "app" || isLocalhost;
+  const isVercel = host.includes("vercel.app");
+
+  if (isLocalhost || isVercel) {
+    return NextResponse.next();
+  }
+
+  const subdomain = host.split(".")[0];
+  const isRootDomain = subdomain === "www" || subdomain === "app";
 
   if (isRootDomain) {
     return NextResponse.next();
