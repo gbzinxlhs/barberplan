@@ -9,11 +9,13 @@ import {
   Check,
   ChevronRight,
   ArrowRight,
-  Star,
-  Smartphone,
-  MousePointerClick,
-  Sparkles,
 } from "lucide-react";
+import {
+  BarberPole,
+  BarberChair,
+  Comb,
+  Mustache,
+} from "@/components/barber-icons";
 
 const features = [
   {
@@ -93,64 +95,6 @@ const plans = [
   },
 ];
 
-function BarberPole() {
-  return (
-    <svg viewBox="0 0 24 80" className="h-40 w-auto" fill="none">
-      <rect x="6" y="2" width="12" height="76" rx="6" className="fill-zinc-800" />
-      <rect x="8" y="4" width="8" height="72" rx="4" fill="url(#stripe)" />
-      <defs>
-        <linearGradient id="stripe" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ef4444" />
-          <stop offset="18%" stopColor="#ef4444" />
-          <stop offset="18%" stopColor="#ffffff" />
-          <stop offset="34%" stopColor="#ffffff" />
-          <stop offset="34%" stopColor="#3b82f6" />
-          <stop offset="50%" stopColor="#3b82f6" />
-          <stop offset="50%" stopColor="#ef4444" />
-          <stop offset="68%" stopColor="#ef4444" />
-          <stop offset="68%" stopColor="#ffffff" />
-          <stop offset="84%" stopColor="#ffffff" />
-          <stop offset="84%" stopColor="#3b82f6" />
-          <stop offset="100%" stopColor="#3b82f6" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
-
-function BarberChair() {
-  return (
-    <svg viewBox="0 0 120 160" className="w-40 h-auto" fill="none">
-      <rect x="30" y="100" width="60" height="12" rx="4" className="fill-zinc-700" />
-      <rect x="40" y="112" width="40" height="6" rx="2" className="fill-zinc-700" />
-      <rect x="52" y="118" width="16" height="30" rx="3" className="fill-zinc-700" />
-      <rect x="20" y="148" width="80" height="8" rx="4" className="fill-zinc-800" />
-      <path d="M60 96 L60 70 Q60 40 90 30 L90 40 Q70 48 70 70 L70 96 Z" className="fill-zinc-700" />
-      <path d="M60 96 L60 70 Q60 40 30 30 L30 40 Q50 48 50 70 L50 96 Z" className="fill-zinc-700" />
-      <rect x="35" y="30" width="50" height="14" rx="6" className="fill-zinc-600" />
-      <rect x="45" y="18" width="30" height="14" rx="5" className="fill-zinc-600" />
-      <circle cx="60" cy="14" r="6" className="fill-zinc-500" />
-      <ellipse cx="60" cy="110" rx="34" ry="6" className="fill-zinc-800" />
-    </svg>
-  );
-}
-
-function CombIcon() {
-  return (
-    <svg viewBox="0 0 100 40" className="w-24 h-auto" fill="none">
-      <rect x="2" y="8" width="96" height="6" rx="2" className="fill-zinc-700" />
-      <rect x="2" y="18" width="96" height="6" rx="2" className="fill-zinc-700" />
-      <rect x="2" y="28" width="50" height="6" rx="2" className="fill-zinc-700" />
-      <line x1="10" y1="8" x2="10" y2="34" className="stroke-zinc-600" strokeWidth="1.5" />
-      <line x1="20" y1="8" x2="20" y2="34" className="stroke-zinc-600" strokeWidth="1.5" />
-      <line x1="30" y1="8" x2="30" y2="34" className="stroke-zinc-600" strokeWidth="1.5" />
-      <line x1="40" y1="8" x2="40" y2="34" className="stroke-zinc-600" strokeWidth="1.5" />
-      <line x1="50" y1="8" x2="50" y2="34" className="stroke-zinc-600" strokeWidth="1.5" />
-      <rect x="78" y="2" width="20" height="36" rx="3" className="fill-zinc-700" />
-    </svg>
-  );
-}
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-background">
@@ -216,11 +160,12 @@ export default function Home() {
 
               <div className="relative hidden lg:flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-3xl" />
-                <div className="relative flex items-center gap-6 p-8 rounded-2xl border border-border bg-card">
-                  <BarberChair />
-                  <div className="flex flex-col items-center gap-6">
-                    <BarberPole />
-                    <CombIcon />
+                <div className="relative flex items-center gap-8 p-8 rounded-2xl border border-border bg-card">
+                  <BarberChair className="w-36 h-auto" />
+                  <div className="flex flex-col items-center gap-5">
+                    <BarberPole className="h-44 w-auto" />
+                    <Comb className="w-28 h-auto" />
+                    <Mustache className="w-24 h-auto" />
                   </div>
                   <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
                     <Scissors className="size-8 text-primary" />
@@ -282,30 +227,49 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border bg-card p-6 overflow-hidden">
-                <div className="flex items-center gap-3 mb-5 pb-4 border-b border-border">
-                  <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold">
-                    B
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-b from-primary/20 to-transparent rounded-2xl blur" />
+                <div className="relative rounded-xl border border-border bg-card p-6 overflow-hidden">
+                  <div className="flex items-center gap-3 mb-5 pb-4 border-b border-border">
+                    <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold">
+                      <Comb className="w-4 h-auto" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-foreground">Barbearia do Zé</div>
+                      <div className="text-xs text-muted-foreground">ze.barberplan.com</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm font-semibold text-foreground">Barbearia do Zé</div>
-                    <div className="text-xs text-muted-foreground">barberplan.vercel.app/barbearia-do-ze</div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-3 w-24 rounded bg-secondary" />
-                  <div className="grid gap-2">
-                    {["Corte Degradê - R$ 45", "Barba Completa - R$ 30", "Hidratação - R$ 25"].map((s) => (
-                      <div
-                        key={s}
-                        className="flex items-center justify-between p-3 rounded-lg bg-secondary text-sm"
-                      >
-                        <span className="text-foreground">{s}</span>
-                        <button className="text-xs font-semibold text-primary hover:underline">
-                          Agendar
-                        </button>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Scissors className="size-3.5 text-muted-foreground" />
+                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Serviços</span>
+                    </div>
+                    <div className="grid gap-2">
+                      {[
+                        { name: "Corte Degradê", price: "R$ 45" },
+                        { name: "Barba Completa", price: "R$ 30" },
+                        { name: "Hidratação", price: "R$ 25" },
+                        { name: "Corte + Barba", price: "R$ 65", popular: true },
+                      ].map((s) => (
+                        <div
+                          key={s.name}
+                          className={`flex items-center justify-between p-3 rounded-lg text-sm ${
+                            s.popular
+                              ? "bg-primary/10 border border-primary/30"
+                              : "bg-secondary"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {s.popular && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                            <span className="text-foreground">{s.name}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-muted-foreground text-xs">{s.price}</span>
+                            <span className="text-xs font-semibold text-primary">Agendar</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
