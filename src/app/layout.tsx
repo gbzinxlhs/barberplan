@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BarberPlan - Agendamento para Barbearias",
-  description: "Sistema completo de agendamento e gestão para barbearias",
+  title: "BarberPlan - Gestão Inteligente para Barbearias",
+  description:
+    "Agendamento online, gestão de clientes, controle financeiro e lembretes via WhatsApp para sua barbearia.",
 };
 
 export default function RootLayout({
