@@ -15,7 +15,22 @@ import {
   BarberChair,
   Comb,
   Mustache,
+  ScissorsIcon,
+  StraightRazor,
+  HairClipper,
+  ShavingBrush,
 } from "@/components/barber-icons";
+
+const barberIcons = [
+  { icon: BarberChair, w: "w-20", pos: "top-10 left-0" },
+  { icon: BarberPole, w: "w-6", pos: "top-40 right-10" },
+  { icon: Comb, w: "w-16", pos: "bottom-20 left-10" },
+  { icon: Mustache, w: "w-14", pos: "bottom-10 right-0" },
+  { icon: ScissorsIcon, w: "w-10", pos: "top-60 right-20" },
+  { icon: StraightRazor, w: "w-16", pos: "top-20 left-20" },
+  { icon: HairClipper, w: "w-10", pos: "bottom-40 right-10" },
+  { icon: ShavingBrush, w: "w-6", pos: "bottom-10 left-0" },
+];
 
 const features = [
   {
@@ -98,11 +113,16 @@ const plans = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <header className="border-b border-border relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+          <HairClipper className="absolute w-8 top-4 right-32 text-foreground" />
+          <Comb className="absolute w-12 top-3 right-12 text-foreground" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between relative z-10">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground relative overflow-hidden">
               B
+              <ScissorsIcon className="absolute -bottom-1 -right-1 w-3 text-primary-foreground/30" />
             </div>
             <span className="text-lg font-bold text-foreground">BarberPlan</span>
           </div>
@@ -124,12 +144,19 @@ export default function Home() {
       </header>
 
       <main>
-        <section className="border-b border-border overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32">
+        <section className="border-b border-border overflow-hidden relative">
+          <div className="absolute inset-0 opacity-[0.04] pointer-events-none hidden lg:block">
+            <BarberChair className="absolute w-16 -top-4 right-[15%] text-foreground" />
+            <Mustache className="absolute w-20 top-[20%] left-[5%] text-foreground" />
+            <Comb className="absolute w-24 bottom-[15%] right-[8%] text-foreground" />
+            <StraightRazor className="absolute w-14 bottom-[30%] left-[3%] text-foreground" />
+            <ScissorsIcon className="absolute w-8 top-[40%] right-[3%] text-foreground" />
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32 relative z-10">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 <div className="inline-flex items-center gap-2 bg-secondary rounded-full px-3 py-1 text-xs font-medium text-muted-foreground mb-6">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <ScissorsIcon className="size-3 text-muted-foreground" />
                   Sistema completo para barbearias
                 </div>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-[1.05] tracking-tight">
@@ -168,40 +195,61 @@ export default function Home() {
                     <Mustache className="w-24 h-auto" />
                   </div>
                   <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Scissors className="size-8 text-primary" />
+                    <ScissorsIcon className="size-8 text-primary" />
                   </div>
                 </div>
+                <ShavingBrush className="absolute w-8 -top-3 -right-3 text-foreground/20" />
               </div>
             </div>
           </div>
         </section>
 
-        <section className="border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+        <section className="border-b border-border relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none hidden sm:block">
+            <Mustache className="absolute w-16 top-4 left-[20%] text-foreground" />
+            <Comb className="absolute w-16 bottom-2 right-[15%] text-foreground" />
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 relative z-10">
             <div className="grid sm:grid-cols-3 gap-8">
               {[
-                { value: "500+", label: "Barbearias cadastradas" },
-                { value: "10k+", label: "Agendamentos realizados" },
-                { value: "98%", label: "Satisfação dos clientes" },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="text-center p-8 rounded-xl border border-border bg-card"
-                >
-                  <div className="text-4xl sm:text-5xl font-bold text-primary mb-2">
-                    {stat.value}
+                { value: "500+", label: "Barbearias cadastradas", icon: Mustache },
+                { value: "10k+", label: "Agendamentos realizados", icon: ScissorsIcon },
+                { value: "98%", label: "Satisfação dos clientes", icon: Comb },
+              ].map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div
+                    key={stat.label}
+                    className="text-center p-8 rounded-xl border border-border bg-card relative overflow-hidden group"
+                  >
+                    <Icon className="absolute w-12 opacity-[0.06] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground group-hover:opacity-[0.1] transition-opacity" />
+                    <div className="relative z-10">
+                      <div className="text-4xl sm:text-5xl font-bold text-primary mb-2">
+                        {stat.value}
+                      </div>
+                      <div className="text-sm text-muted-foreground">{stat.label}</div>
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
 
-        <section className="border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <section className="border-b border-border relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none hidden lg:block">
+            <BarberChair className="absolute w-24 top-[10%] right-[5%] text-foreground" />
+            <StraightRazor className="absolute w-20 bottom-[20%] left-[3%] text-foreground" />
+            <ShavingBrush className="absolute w-10 top-[30%] left-[8%] text-foreground" />
+            <HairClipper className="absolute w-12 bottom-[10%] right-[15%] text-foreground" />
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
+                <div className="inline-flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-4">
+                  <ScissorsIcon className="size-3.5 text-primary" />
+                  Como funciona
+                </div>
                 <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
                   Seu cliente agenda sem precisar ligar
                 </h2>
@@ -210,28 +258,35 @@ export default function Home() {
                   disponíveis. O cliente escolhe, confirma e pronto. Tudo online,
                   sem telefonemas.
                 </p>
-                <div className="mt-6 space-y-4">
+                <div className="mt-8 space-y-5">
                   {[
-                    "Cliente acessa pelo link da sua barbearia",
-                    "Escolhe o serviço e o barbeiro preferido",
-                    "Seleciona o melhor horário na agenda",
-                    "Recebe confirmação automática no WhatsApp",
-                  ].map((step, i) => (
-                    <div key={step} className="flex items-start gap-3">
-                      <div className="w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                        {i + 1}
+                    { text: "Cliente acessa pelo link da sua barbearia", icon: HairClipper },
+                    { text: "Escolhe o serviço e o barbeiro preferido", icon: Comb },
+                    { text: "Seleciona o melhor horário na agenda", icon: StraightRazor },
+                    { text: "Recebe confirmação automática no WhatsApp", icon: Mustache },
+                  ].map((step, i) => {
+                    const Icon = step.icon;
+                    return (
+                      <div key={step.text} className="flex items-start gap-4 group">
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-primary/10 transition-colors">
+                          <Icon className="w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground font-mono">0{i + 1}</span>
+                          <p className="text-sm text-foreground mt-0.5">{step.text}</p>
+                        </div>
                       </div>
-                      <span className="text-sm text-foreground">{step}</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-b from-primary/20 to-transparent rounded-2xl blur" />
                 <div className="relative rounded-xl border border-border bg-card p-6 overflow-hidden">
+                  <Mustache className="absolute w-16 opacity-[0.04] -bottom-4 -right-4 text-foreground pointer-events-none" />
                   <div className="flex items-center gap-3 mb-5 pb-4 border-b border-border">
-                    <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold">
+                    <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
                       <Comb className="w-4 h-auto" />
                     </div>
                     <div>
@@ -239,9 +294,9 @@ export default function Home() {
                       <div className="text-xs text-muted-foreground">ze.barberplan.com</div>
                     </div>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-3 relative z-10">
                     <div className="flex items-center gap-2 mb-3">
-                      <Scissors className="size-3.5 text-muted-foreground" />
+                      <ScissorsIcon className="size-3.5 text-primary" />
                       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Serviços</span>
                     </div>
                     <div className="grid gap-2">
@@ -277,9 +332,19 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="funcionalidades" className="border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <section id="funcionalidades" className="border-b border-border relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none hidden lg:block">
+            <BarberPole className="absolute w-6 h-32 top-[15%] left-[5%] text-foreground" />
+            <ScissorsIcon className="absolute w-8 top-[45%] right-[8%] text-foreground" />
+            <Comb className="absolute w-16 bottom-[10%] left-[10%] text-foreground" />
+            <Mustache className="absolute w-14 bottom-[30%] right-[5%] text-foreground" />
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
             <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-3">
+                <ScissorsIcon className="size-3.5 text-primary" />
+                Recursos
+              </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
                 Tudo que sua barbearia precisa
               </h2>
@@ -289,15 +354,19 @@ export default function Home() {
               </p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border rounded-xl overflow-hidden">
-              {features.map((item) => {
+              {features.map((item, idx) => {
                 const Icon = item.icon;
+                const BarbershopIcon = [
+                  BarberChair, BarberPole, Comb, Mustache, ScissorsIcon, StraightRazor,
+                ][idx % 6];
                 return (
-                  <div key={item.title} className="bg-card p-8">
-                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-5">
+                  <div key={item.title} className="bg-card p-8 relative group">
+                    <BarbershopIcon className="absolute w-16 opacity-[0.04] -bottom-4 -right-4 text-foreground group-hover:opacity-[0.08] transition-opacity pointer-events-none" />
+                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-5 relative">
                       <Icon className="size-5 text-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                    <h3 className="text-lg font-semibold text-foreground mb-2 relative">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed relative">{item.desc}</p>
                   </div>
                 );
               })}
@@ -305,9 +374,19 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="planos" className="border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <section id="planos" className="border-b border-border relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none hidden lg:block">
+            <Mustache className="absolute w-24 top-[8%] left-[50%] -translate-x-1/2 text-foreground" />
+            <ShavingBrush className="absolute w-8 top-[30%] left-[8%] text-foreground" />
+            <HairClipper className="absolute w-10 bottom-[20%] right-[8%] text-foreground" />
+            <Comb className="absolute w-16 bottom-[10%] left-[5%] text-foreground" />
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
             <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-3">
+                <ScissorsIcon className="size-3.5 text-primary" />
+                Investimento
+              </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
                 Planos sob medida
               </h2>
@@ -317,63 +396,77 @@ export default function Home() {
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-              {plans.map((plan) => (
-                <div
-                  key={plan.name}
-                  className={`rounded-xl border ${
-                    plan.popular
-                      ? "border-primary bg-card ring-1 ring-primary"
-                      : "border-border bg-card"
-                  } p-8 relative`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-                      Mais popular
-                    </div>
-                  )}
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">{plan.desc}</p>
-                  </div>
-                  <div className="mb-6">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-foreground">
-                        R$ {plan.monthly}
-                      </span>
-                      <span className="text-sm text-muted-foreground">/mês</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ou R$ {plan.annual}/ano (economize{" "}
-                      {Math.round((1 - plan.annual / (plan.monthly * 12)) * 100)}%)
-                    </p>
-                  </div>
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <Check className="size-4 text-primary mt-0.5 shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href="/admin"
-                    className={`w-full flex items-center justify-center gap-2 font-semibold px-4 py-3 rounded-lg text-sm transition-all ${
+              {plans.map((plan, idx) => {
+                const CornerIcon = [BarberChair, BarberPole, Mustache][idx];
+                return (
+                  <div
+                    key={plan.name}
+                    className={`rounded-xl border ${
                       plan.popular
-                        ? "bg-primary text-primary-foreground hover:opacity-90"
-                        : "border border-border text-foreground hover:bg-secondary"
-                    }`}
+                        ? "border-primary bg-card ring-1 ring-primary"
+                        : "border-border bg-card"
+                    } p-8 relative overflow-hidden group`}
                   >
-                    Começar Agora
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </div>
-              ))}
+                    <CornerIcon className={`absolute w-20 opacity-[0.04] -bottom-6 -right-6 text-foreground group-hover:opacity-[0.08] transition-opacity pointer-events-none`} />
+                    {plan.popular && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full z-10">
+                        Mais popular
+                      </div>
+                    )}
+                    <div className="mb-6 relative z-10">
+                      <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">{plan.desc}</p>
+                    </div>
+                    <div className="mb-6 relative z-10">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold text-foreground">
+                          R$ {plan.monthly}
+                        </span>
+                        <span className="text-sm text-muted-foreground">/mês</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        ou R$ {plan.annual}/ano (economize{" "}
+                        {Math.round((1 - plan.annual / (plan.monthly * 12)) * 100)}%)
+                      </p>
+                    </div>
+                    <ul className="space-y-3 mb-8 relative z-10">
+                      {plan.features.map((feature) => (
+                        <li key={feature} className="flex items-start gap-3 text-sm text-muted-foreground">
+                          <Check className="size-4 text-primary mt-0.5 shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href="/admin"
+                      className={`w-full flex items-center justify-center gap-2 font-semibold px-4 py-3 rounded-lg text-sm transition-all relative z-10 ${
+                        plan.popular
+                          ? "bg-primary text-primary-foreground hover:opacity-90"
+                          : "border border-border text-foreground hover:bg-secondary"
+                      }`}
+                    >
+                      Começar Agora
+                      <ArrowRight className="size-4" />
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        <section>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
+        <section className="relative overflow-hidden border-b border-border">
+          <div className="absolute inset-0 opacity-[0.04] pointer-events-none hidden sm:block">
+            <BarberChair className="absolute w-20 top-[5%] left-[10%] text-foreground" />
+            <Comb className="absolute w-24 top-[10%] right-[15%] text-foreground" />
+            <Mustache className="absolute w-28 bottom-[15%] left-[20%] text-foreground" />
+            <BarberPole className="absolute w-8 h-28 bottom-[20%] right-[10%] text-foreground" />
+            <ScissorsIcon className="absolute w-10 top-[40%] left-[40%] text-foreground" />
+            <ShavingBrush className="absolute w-12 top-[60%] left-[5%] text-foreground" />
+            <HairClipper className="absolute w-10 bottom-[5%] right-[30%] text-foreground" />
+            <StraightRazor className="absolute w-16 top-[30%] right-[25%] text-foreground" />
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center relative z-10">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
               Pronto para transformar sua barbearia?
             </h2>
@@ -392,11 +485,16 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-border py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+      <footer className="border-t border-border py-8 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+          <ScissorsIcon className="absolute w-6 bottom-4 right-[20%] text-foreground" />
+          <Comb className="absolute w-10 top-2 left-[15%] text-foreground" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground relative z-10">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
+            <div className="w-6 h-6 rounded bg-secondary flex items-center justify-center text-xs font-bold text-foreground relative overflow-hidden">
               B
+              <ScissorsIcon className="absolute -bottom-1 -right-1 w-2 text-foreground/30" />
             </div>
             <span className="font-semibold text-foreground">BarberPlan</span>
           </div>
