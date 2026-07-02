@@ -83,7 +83,7 @@ export default function SetupContent() {
 
     const finalSlug = normalizeSlug(storeSlug) || slug;
 
-    await fetch(`/api/tenants/${slug}`, {
+    const res = await fetch(`/api/tenants/${slug}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -95,6 +95,18 @@ export default function SetupContent() {
         ...(finalSlug !== slug ? { slug: finalSlug, subdomain: finalSlug } : {}),
       }),
     });
+
+    const data = await res.json();
+
+    if (data.tenant) {
+      const stored = localStorage.getItem("saas_tenant");
+      if (stored) {
+        try {
+          const t = JSON.parse(stored);
+          localStorage.setItem("saas_tenant", JSON.stringify({ ...t, ...data.tenant }));
+        } catch {}
+      }
+    }
 
     setSaving(false);
     setDone(true);

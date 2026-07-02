@@ -176,18 +176,28 @@ function HomeContent() {
           </div>
           <div className="flex items-center gap-4">
             <SaasLogin />
-            <Link
-              href="/admin"
-              className="text-sm text-zinc-400 hover:text-white transition-colors"
-            >
-              Acessar
-            </Link>
-            <Link
-              href="#planos"
-              className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-            >
-              Planos
-            </Link>
+            {user && user.plan !== "free" ? (
+              <Link
+                href="/admin"
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
+                Acessar
+              </Link>
+            ) : user ? (
+              <Link
+                href="#planos"
+                className="text-sm text-primary hover:opacity-80 transition-opacity font-medium"
+              >
+                Escolher Plano
+              </Link>
+            ) : (
+              <Link
+                href="#planos"
+                className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Planos
+              </Link>
+            )}
           </div>
         </div>
       </header>

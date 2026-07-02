@@ -170,15 +170,15 @@ SaasUser ─→ Tenant (opcional)
 ### Fluxo de Checkout (/checkout)
 1. **Não logado:** mostra formulário de cadastro/login inline (POST `/api/saas-users`)
 2. **Logado + Trial:** confirma → cria tenant + ativa 14 dias grátis → redireciona setup
-3. **Logado + Pago:** solicita CPF/CNPJ → gera Pix via Asaas → mostra QR Code
-4. Webhook Asaas confirma pagamento → ativa plano
+3. **Logado + Pago:** solicita CPF/CNPJ → gera Pix via Asaas (já cria tenant) → mostra QR Code + botão "Configurar Barbearia"
+4. Webhook Asaas confirma pagamento → ativa plano com plan+billing lidos do externalReference
 
 ### Asaas Integration (src/lib/asaas.ts)
 - `createCustomer`, `findCustomerByEmail`, `updateCustomer`, `createPixPayment`, `getPayment`
 - API v3, endpoint sandbox/production via env
 - Cliente existente é atualizado com CPF se necessário
-- `POST /api/asaas/create-payment` — gera QR Code Pix
-- `POST /api/asaas/webhook` — recebe confirmação, ativa plano
+- `POST /api/asaas/create-payment` — gera QR Code Pix, cria tenant se necessário, retorna `tenantSlug`
+- `POST /api/asaas/webhook` — recebe confirmação, parseia externalReference (JSON com userId/plan/billing), ativa plano com expiry correto
 
 ### Sessão
 - **SAAS:** `saas_user` + `saas_tenant` no localStorage
@@ -290,6 +290,9 @@ Aplicadas via `className="animate-float"` etc. nos ícones decorativos da vitrin
 - **`/api/tenants` POST não existe** — a página `/admin/cadastro` tenta POST em `/api/tenants` (sem slug) que retorna 404. Precisa criar `src/app/api/tenants/route.ts`.
 - **Sem proteção de admin** — qualquer um que acessar `/admin` vê dados. SaasUser login é apenas visual (localStorage), sem JWT/session real.
 - **Asaas em sandbox** — Pix só funciona no sandbox. Para produção, trocar `ASAAS_ENVIRONMENT` para `production` e usar chave real.
+- **Admin redirect anteriormente bugado:** `/admin/layout.tsx` redirecionava para `/` antes de verificar `/admin/setup` e `/admin/cadastro`. **FIX:** verificar setup/cadastro primeiro, aguardar `ready` state.
+- **Webhook hardcodava plan="pro" e 1 ano de expiry:** `externalReference` agora é JSON `{userId, plan, billing}`, webhook lê plan e billing corretos.
+- **create-payment não criava tenant:** agora cria tenant (slug automático) junto com o Pix, retorna `tenantSlug` para o checkout.
 
 ### 🟡 MÉDIO
 - **`/admin/clients` lista TODOS os SAAS users sem restrição** — qualquer admin logado vê todos os clientes do sistema.

@@ -19,13 +19,33 @@ export async function POST(request: Request) {
     }
 
     if (asaasPayment.status === "RECEIVED" || asaasPayment.status === "CONFIRMED") {
-      const planExpiresAt = new Date();
-      planExpiresAt.setFullYear(planExpiresAt.getFullYear() + 1);
+      // Parse externalReference as JSON (backward-compatible: if it's a plain userId, treat as pro/annual)
+      let userId: string;
+      let plan = "pro";
+      let billing = "annual";
+
+      try {
+        const ref = JSON.parse(externalReference);
+        userId = ref.userId;
+        plan = ref.plan || "pro";
+        billing = ref.billing || "annual";
+      } catch {
+        userId = externalReference;
+      }
+
+      const now = new Date();
+      let planExpiresAt: Date;
+
+      if (billing === "monthly") {
+        planExpiresAt = new Date(now.setMonth(now.getMonth() + 1));
+      } else {
+        planExpiresAt = new Date(now.setFullYear(now.getFullYear() + 1));
+      }
 
       await prisma.saasUser.update({
-        where: { id: externalReference },
+        where: { id: userId },
         data: {
-          plan: "pro",
+          plan,
           planExpiresAt,
         },
       });

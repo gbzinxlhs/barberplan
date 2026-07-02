@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { useSaasUser } from "@/contexts/saas-user";
 import { SaasUserProvider } from "@/contexts/saas-user";
 
@@ -17,14 +18,20 @@ function AdminLayoutRedirect({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, tenant } = useSaasUser();
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!user || !tenant?.slug) {
+    if (!user || !tenant) return;
+    setReady(true);
+
+    if (pathname.startsWith("/admin/setup") || pathname.startsWith("/admin/cadastro")) return;
+
+    if (!tenant?.slug) {
       router.push("/");
       return;
     }
+
     const slug = tenant.slug;
-    if (pathname.startsWith("/admin/setup") || pathname.startsWith("/admin/cadastro")) return;
     const targetPath = pathname === "/admin" || pathname === "/admin/"
       ? `/${slug}/admin`
       : `/${slug}${pathname}`;
@@ -33,12 +40,10 @@ function AdminLayoutRedirect({ children }: { children: React.ReactNode }) {
     }
   }, [user, tenant, pathname, router]);
 
-  if (!user || !tenant?.slug) {
+  if (!ready) {
     return (
       <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-sm text-zinc-500">Redirecionando...</p>
-        </div>
+        <Loader2 className="size-6 text-zinc-400 animate-spin" />
       </div>
     );
   }

@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createCustomer, findCustomerByEmail, updateCustomer, createPixPayment } from "@/lib/asaas";
 
+function generateSlug(name: string, surname: string): string {
+  const base = `${name}-${surname}`
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  const suffix = Math.random().toString(36).substring(2, 6);
+  return `${base}-${suffix}`;
+}
+
 export async function POST(request: Request) {
   try {
     const { email, plan, billing, cpfCnpj } = await request.json();
@@ -29,6 +39,23 @@ export async function POST(request: Request) {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 3);
 
+    // Create tenant if user doesn't have one yet
+    let tenantId = user.tenantId;
+    let tenant = tenantId ? await prisma.tenant.findUnique({ where: { id: tenantId } }) : null;
+    if (!tenant) {
+      const slug = generateSlug(user.name, user.surname);
+      tenant = await prisma.tenant.create({
+        data: {
+          name: `${user.name} ${user.surname}`,
+          slug,
+          subdomain: slug,
+          phone: user.phone,
+          primaryColor: "#22c55e",
+        },
+      });
+      tenantId = tenant.id;
+    }
+
     let asaasCustomer = await findCustomerByEmail(email);
     if (asaasCustomer) {
       if (cpfCnpj) {
@@ -50,7 +77,7 @@ export async function POST(request: Request) {
       value,
       dueDate: dueDate.toISOString().split("T")[0],
       description: `BarberPlan - Plano ${planData.name} (${billing === "monthly" ? "Mensal" : "Anual"})`,
-      externalReference: user.id,
+      externalReference: JSON.stringify({ userId: user.id, plan, billing }),
     });
 
     return NextResponse.json({
@@ -59,6 +86,7 @@ export async function POST(request: Request) {
       pixQrCode: payment.pixQrCode,
       pixCopyPaste: payment.pixCopyPaste,
       expiresAt: dueDate.toISOString(),
+      tenantSlug: tenant.slug,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "Erro ao criar pagamento" }, { status: 500 });

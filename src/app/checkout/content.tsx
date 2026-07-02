@@ -29,7 +29,7 @@ export default function CheckoutContent() {
   const [loginError, setLoginError] = useState("");
 
   const [createdSlug, setCreatedSlug] = useState<string | null>(null);
-  const [pixData, setPixData] = useState<{ pixQrCode: string; pixCopyPaste: string; paymentId: string; value: number } | null>(null);
+  const [pixData, setPixData] = useState<{ pixQrCode: string; pixCopyPaste: string; paymentId: string; value: number; tenantSlug?: string } | null>(null);
   const [pixLoading, setPixLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cpfCnpj, setCpfCnpj] = useState("");
@@ -73,6 +73,10 @@ export default function CheckoutContent() {
       const data = await res.json();
       if (!res.ok) { setError(data.error); return; }
       setPixData(data);
+      if (data.tenantSlug) {
+        localStorage.setItem("saas_tenant", JSON.stringify({ slug: data.tenantSlug }));
+        setCreatedSlug(data.tenantSlug);
+      }
     } catch {
       setError("Erro ao gerar pagamento. Tente novamente.");
     } finally {
