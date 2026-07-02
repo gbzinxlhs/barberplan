@@ -4,7 +4,7 @@ import { createCustomer, findCustomerByEmail, createPixPayment } from "@/lib/asa
 
 export async function POST(request: Request) {
   try {
-    const { email, plan, billing } = await request.json();
+    const { email, plan, billing, cpfCnpj } = await request.json();
 
     if (!email || !plan || !billing) {
       return NextResponse.json({ error: "Dados incompletos" }, { status: 400 });
@@ -35,6 +35,7 @@ export async function POST(request: Request) {
         name: `${user.name} ${user.surname}`,
         email: user.email,
         phone: user.phone,
+        cpfCnpj: cpfCnpj || undefined,
       });
     }
 

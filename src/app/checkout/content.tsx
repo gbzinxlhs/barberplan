@@ -32,6 +32,7 @@ export default function CheckoutContent() {
   const [pixData, setPixData] = useState<{ pixQrCode: string; pixCopyPaste: string; paymentId: string; value: number } | null>(null);
   const [pixLoading, setPixLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [cpfCnpj, setCpfCnpj] = useState("");
 
   const plan = plans[planSlug];
   const price = !isTrial ? (billing === "monthly" ? plan.monthly : plan.annual) : 0;
@@ -67,7 +68,7 @@ export default function CheckoutContent() {
       const res = await fetch("/api/asaas/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email, plan: planSlug, billing }),
+        body: JSON.stringify({ email: user.email, plan: planSlug, billing, cpfCnpj }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); return; }
@@ -271,6 +272,19 @@ export default function CheckoutContent() {
                   <p className="text-zinc-500">{user.phone}</p>
                 </div>
               </div>
+
+              {!isTrial && !pixData && (
+                <div className="py-3 border-b border-zinc-800">
+                  <label className="block text-xs font-medium text-zinc-400 mb-1">CPF / CNPJ</label>
+                  <input
+                    value={cpfCnpj}
+                    onChange={(e) => setCpfCnpj(e.target.value)}
+                    required
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
+                    placeholder="000.000.000-00"
+                  />
+                </div>
+              )}
 
               <div className="pt-2 space-y-2">
                 {error && <p className="text-xs text-red-400">{error}</p>}
