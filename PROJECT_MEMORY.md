@@ -6,6 +6,7 @@
 - **Deploy:** Vercel — `https://barberplan-nine.vercel.app`
 - **Repositório:** `https://github.com/gbzinxlhs/barberplan.git`
 - **Domínio:** Em `*.vercel.app` — middleware de subdomínio pronto para custom domain
+- **Regra:** Toda alteração deve ser aprovada pelo usuário antes do deploy — sempre perguntar "Posso fazer o deploy?" antes de executar
 
 ---
 
@@ -202,6 +203,68 @@ Aplicadas via `className="animate-float"` etc. nos ícones decorativos da vitrin
 | `DATABASE_URL` | Conexão Supabase (session pooler) |
 | `ASAAS_API_KEY` | `$aact_hmlg_000M...` (sandbox) |
 | `ASAAS_ENVIRONMENT` | `sandbox` |
+| `SUPER_ADMIN_EMAIL` | Email do super admin (ex: `admin@barberplan.com`) |
+| `SUPER_ADMIN_PASSWORD` | Senha do super admin (ex: `admin123`) |
+| `JWT_SECRET` | Chave secreta JWT (trocar em produção) |
+
+
+---
+
+## Super Admin Panel
+
+### Rota
+- `/super-admin` — Painel privado do super admin (dono da plataforma)
+- `/super-admin/login` — Tela de login com JWT
+- Futuramente mapeável para subdomínio `admin.barberplan.com` via middleware
+
+### Autenticação
+- **JWT-based** com `jsonwebtoken`
+- Credenciais definidas em **env vars** (`SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`)
+- Token armazenado em `localStorage` como `super_admin_token`
+- Validade: 7 dias
+- Contexto: `SuperAdminProvider` / `useSuperAdmin()` hook
+
+### API Routes
+| Rota | Método | Descrição |
+|------|--------|-----------|
+| `/api/auth/super-admin/login` | POST | Login com email+senha, retorna JWT |
+| `/api/auth/super-admin/me` | GET | Verifica token, retorna dados do admin |
+| `/api/super-admin/tenants` | GET | Lista todos tenants com SAAS users (protegida) |
+
+### Dashboard (src/app/super-admin/page.tsx)
+- Cards de resumo: total barbearias, total SAAS users, planos ativos
+- Tabela completa com:
+  - Barbearia (nome + data de criação)
+  - Subdomínio (link para vitrine)
+  - Comprador (nome + iniciais)
+  - Contato (email + telefone)
+  - Plano (badge colorido: free/trial/starter/pro)
+  - Data da compra
+  - Data de expiração do plano
+  - Status (ativo/expirado/grátis)
+
+### Schema Changes (prisma/schema.prisma)
+- `Tenant.domain` — String? @unique (para domínio customizado do cliente)
+- `SaasUser.role` — String @default("user") (para identificar super_admin)
+
+### Env Vars
+| Variável | Descrição |
+|----------|-----------|
+| `SUPER_ADMIN_EMAIL` | Email do super admin |
+| `SUPER_ADMIN_PASSWORD` | Senha do super admin |
+| `JWT_SECRET` | Chave secreta para assinar JWT |
+
+### Arquivos Criados
+| Arquivo | Descrição |
+|---------|-----------|
+| `src/lib/auth.ts` | Utilitários JWT (sign, verify, getTokenFromHeader) |
+| `src/contexts/super-admin.tsx` | Contexto React (login, logout, token management) |
+| `src/app/api/auth/super-admin/login/route.ts` | API de login |
+| `src/app/api/auth/super-admin/me/route.ts` | API de verificação de token |
+| `src/app/api/super-admin/tenants/route.ts` | API de listagem de tenants |
+| `src/app/super-admin/login/page.tsx` | Página de login |
+| `src/app/super-admin/layout.tsx` | Layout com sidebar + proteção de rota |
+| `src/app/super-admin/page.tsx` | Dashboard com tabela de clientes |
 
 ---
 
@@ -229,7 +292,11 @@ Aplicadas via `className="animate-float"` etc. nos ícones decorativos da vitrin
 - **Booking não valida conflito de horário real** — usa `status !== "cancelled"` para blocked slots, mas não considera buffer entre agendamentos.
 
 ### 🟢 MELHORIAS FUTURAS
-- Adicionar autenticação real (JWT/cookies) para SAAS users e admin
+- Mapear `/super-admin` para subdomínio `admin.barberplan.com` no middleware (após configurar domínio customizado)
+- Adicionar CRUD de tenants diretamente no super admin (criar/editar/excluir)
+- Gráficos de receita total, conversão de trials, etc.
+- Notificações de expiração de plano
+- Autenticação real (JWT/cookies) para SAAS users e admin
 - Criar rota `POST /api/tenants` para cadastro funcional
 - `prisma db push` precisa rodar sempre que schema mudar no banco de produção
 - Migrar de `vercel.app` para domínio próprio com wildcard DNS

@@ -11,6 +11,7 @@ model Tenant {
   name        String
   slug        String   @unique
   subdomain   String   @unique
+  domain      String?  @unique
   logo        String?
   primaryColor String  @default("#1a1a2e")
   phone       String?
@@ -158,6 +159,7 @@ model SaasUser {
   phone      String
   plan       String    @default("free")
   planExpiresAt DateTime?
+  role       String    @default("user")
   tenantId   String?
   tenant     Tenant?   @relation(fields: [tenantId], references: [id])
   createdAt  DateTime  @default(now())

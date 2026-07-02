@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const host = request.headers.get("host") || "";
 
-  if (pathname.startsWith("/_next") || pathname.startsWith("/api") || pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/_next") || pathname.startsWith("/api") || pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) {
     return NextResponse.next();
   }
 
