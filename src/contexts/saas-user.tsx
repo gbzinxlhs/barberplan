@@ -20,6 +20,7 @@ interface SaasUser {
   phone: string;
   plan: string;
   planExpiresAt: string | null;
+  tenantId: string | null;
 }
 
 interface SaasUserContextType {

@@ -18,13 +18,15 @@
 /[tenant]                      → Vitrine pública da barbearia (SSR, Figaro-style)
 /[tenant]/agendar              → Booking flow (5-step: login→serviço→barbeiro→data/hora→confirmar)
 /[tenant]/meus-agendamentos    → Histórico do cliente + cancelar + logout
-/admin                         → Dashboard admin (lê tenant do usuário logado)
-/admin/agendamentos            → Todos agendamentos, ordem cronológica, sem filtro de data
-/admin/servicos                → CRUD de serviços com toggle ativo + remover
-/admin/barbeiros               → CRUD de barbeiros com toggle ativo
-/admin/clientes                → Lista de todos SAAS users cadastrados
-/admin/financeiro              → Relatórios financeiros (mock)
-/admin/configuracoes           → Configurações da barbearia
+/[tenant]/admin                → Dashboard da barbearia (tenant do URL)
+/[tenant]/admin/agendamentos   → Agendamentos da barbearia
+/[tenant]/admin/servicos       → CRUD de serviços
+/[tenant]/admin/barbeiros      → CRUD de barbeiros
+/[tenant]/admin/clientes       → Lista de SAAS users
+/[tenant]/admin/financeiro     → Relatórios financeiros
+/[tenant]/admin/configuracoes  → Configurações da barbearia
+/admin                         → Redireciona para /{slug}/admin (do usuário logado)
+/admin/agendamentos            → Redireciona para /{slug}/admin/agendamentos
 /admin/cadastro                → Signup de novo tenant (quebra — POST em /api/tenents não existe)
 /admin/setup                   → Setup pós-compra: nome, endereço, WhatsApp, Instagram
 /checkout                      → Checkout com login inline + trial grátis ou Pix via Asaas

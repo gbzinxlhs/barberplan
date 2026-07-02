@@ -104,10 +104,10 @@ export default function SetupContent() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button onClick={() => router.push(`/admin/servicos`)} className="bg-zinc-900 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-zinc-800 transition-colors flex items-center gap-2 justify-center">
+            <button onClick={() => router.push(`/${finalSlug}/admin/servicos`)} className="bg-zinc-900 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-zinc-800 transition-colors flex items-center gap-2 justify-center">
               <Scissors className="size-4" /> Adicionar Serviços
             </button>
-            <button onClick={() => router.push(`/admin/barbeiros`)} className="border border-zinc-300 text-zinc-700 px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-zinc-50 transition-colors flex items-center gap-2 justify-center">
+            <button onClick={() => router.push(`/${finalSlug}/admin/barbeiros`)} className="border border-zinc-300 text-zinc-700 px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-zinc-50 transition-colors flex items-center gap-2 justify-center">
               <Clock className="size-4" /> Adicionar Barbeiros
             </button>
           </div>
