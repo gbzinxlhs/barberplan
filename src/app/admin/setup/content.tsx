@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { CheckCircle, Scissors, Clock } from "lucide-react";
+import { CheckCircle, Scissors, Clock, Globe, Loader2, Check, X } from "lucide-react";
 
 export default function SetupContent() {
   const searchParams = useSearchParams();
@@ -14,6 +14,10 @@ export default function SetupContent() {
   const [storePhone, setStorePhone] = useState("");
   const [storeWhatsapp, setStoreWhatsapp] = useState("");
   const [storeInstagram, setStoreInstagram] = useState("");
+  const [storeSlug, setStoreSlug] = useState(slug || "");
+  const [tenantId, setTenantId] = useState("");
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+  const [checkingSlug, setCheckingSlug] = useState(false);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -24,13 +28,44 @@ export default function SetupContent() {
       try {
         const t = JSON.parse(stored);
         setStoreName(t.name || "");
+        setStoreSlug(t.slug || slug);
+        setTenantId(t.id || "");
       } catch {}
     }
   }, [slug, router]);
 
+  const checkSlug = useCallback(async (value: string) => {
+    if (!value || value.length < 3) { setSlugAvailable(null); return; }
+    setCheckingSlug(true);
+    try {
+      const res = await fetch(`/api/tenants/check-slug?slug=${encodeURIComponent(value)}&currentId=${tenantId}`);
+      const data = await res.json();
+      setSlugAvailable(data.available);
+    } catch {
+      setSlugAvailable(null);
+    }
+    setCheckingSlug(false);
+  }, [tenantId]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => checkSlug(storeSlug), 400);
+    return () => clearTimeout(timer);
+  }, [storeSlug, checkSlug]);
+
+  function normalizeSlug(value: string) {
+    return value
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
   async function handleSave() {
     if (!slug) return;
     setSaving(true);
+
+    const finalSlug = normalizeSlug(storeSlug);
+
     await fetch(`/api/tenants/${slug}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -40,19 +75,34 @@ export default function SetupContent() {
         phone: storePhone,
         whatsapp: storeWhatsapp,
         instagram: storeInstagram,
+        ...(finalSlug !== slug ? { slug: finalSlug, subdomain: finalSlug } : {}),
       }),
     });
+
     setSaving(false);
     setDone(true);
   }
 
   if (done) {
+    const finalSlug = normalizeSlug(storeSlug);
+    const siteUrl = `https://barberplan-nine.vercel.app/${finalSlug}`;
+    const adminUrl = `/admin`;
+
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center max-w-md">
           <CheckCircle className="size-12 text-primary mx-auto mb-4" />
           <h2 className="text-xl font-bold text-zinc-900 mb-2">Barbearia configurada!</h2>
-          <p className="text-sm text-zinc-500 mb-6">Agora adicione serviços e barbeiros.</p>
+          <p className="text-sm text-zinc-500 mb-6">Seu site já está no ar.</p>
+
+          <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4 mb-6 text-left">
+            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Seu link público</p>
+            <a href={siteUrl} target="_blank" className="text-sm text-primary font-medium hover:underline flex items-center gap-1.5">
+              <Globe className="size-3.5" />
+              {siteUrl}
+            </a>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button onClick={() => router.push(`/admin/servicos`)} className="bg-zinc-900 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-zinc-800 transition-colors flex items-center gap-2 justify-center">
               <Scissors className="size-4" /> Adicionar Serviços
@@ -84,6 +134,38 @@ export default function SetupContent() {
               placeholder="Minha Barbearia"
             />
           </div>
+
+          <div>
+            <label className="block text-xs font-medium text-zinc-500 mb-1">Endereço da página</label>
+            <div className="flex items-center gap-1.5 text-sm text-zinc-500 bg-zinc-50 border border-zinc-300 rounded-lg px-3 py-2.5">
+              <Globe className="size-3.5 shrink-0 text-zinc-400" />
+              <span className="text-zinc-400">barberplan-nine.vercel.app/</span>
+              <input
+                value={storeSlug}
+                onChange={(e) => setStoreSlug(normalizeSlug(e.target.value))}
+                className="flex-1 bg-transparent border-none outline-none text-zinc-900 p-0 focus:ring-0 min-w-[80px]"
+                placeholder="minha-barbearia"
+              />
+            </div>
+            {storeSlug.length >= 3 && (
+              <div className="flex items-center gap-1.5 mt-1.5">
+                {checkingSlug ? (
+                  <Loader2 className="size-3 text-zinc-400 animate-spin" />
+                ) : slugAvailable === true ? (
+                  <>
+                    <Check className="size-3 text-emerald-500" />
+                    <span className="text-xs text-emerald-600">Disponível</span>
+                  </>
+                ) : slugAvailable === false ? (
+                  <>
+                    <X className="size-3 text-red-500" />
+                    <span className="text-xs text-red-500">Indisponível</span>
+                  </>
+                ) : null}
+              </div>
+            )}
+          </div>
+
           <div>
             <label className="block text-xs font-medium text-zinc-500 mb-1">Endereço</label>
             <input
@@ -126,7 +208,7 @@ export default function SetupContent() {
           <div className="pt-2">
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || slugAvailable === false}
               className="w-full bg-zinc-900 text-white font-semibold py-2.5 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 text-sm"
             >
               {saving ? "Salvando..." : "Salvar e Continuar"}

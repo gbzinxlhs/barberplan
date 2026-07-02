@@ -30,7 +30,8 @@
 /checkout                      → Checkout com login inline + trial grátis ou Pix via Asaas
 /api/appointments              → GET (listar por tenant+data+barberId) / POST (criar)
 /api/appointments/[id]         → PATCH (status) / DELETE
-/api/tenants/[slug]            → GET (tenant + services + barbers + workingHours) / PATCH (atualizar)
+/api/tenants/[slug]         → GET (tenant + services + barbers + workingHours) / PATCH (atualizar)
+/api/tenants/check-slug     → GET (verifica disponibilidade de slug)
 /api/services                  → GET (por tenant) / POST (criar)
 /api/services/[id]             → PATCH / DELETE
 /api/barbers                   → GET (por tenant) / POST (criar)
@@ -147,8 +148,10 @@ SaasUser ─→ Tenant (opcional)
 - Lista todos SAAS users com nome, email, telefone, plano, barbearia, expiração, cadastro
 - Requer `GET /api/saas-users/list`
 
-### Setup Pós-Compra (src/app/admin/setup/page.tsx)
-- Formulário: nome da barbearia, endereço, telefone, WhatsApp, Instagram
+### Setup Pós-Compra (src/app/admin/setup/content.tsx)
+- Formulário: nome da barbearia, **slug/URL personalizada**, endereço, telefone, WhatsApp, Instagram
+- Validação de slug em tempo real (verifica disponibilidade via `/api/tenants/check-slug`)
+- Ao salvar, exibe o link público da barbearia: `https://barberplan-nine.vercel.app/{slug}`
 - Botão "Salvar e Continuar" → redireciona para serviços/barbeiros
 - Requer `PATCH /api/tenants/[slug]`
 
