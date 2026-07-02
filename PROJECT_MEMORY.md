@@ -1,10 +1,11 @@
 # BarberPlan — Memória do Projeto
 
 ## Identidade
-- **O que é:** Micro SAAS de gestão para barbearias (agendamento online + admin)
+- **O que é:** Micro SAAS de gestão para barbearias (agendamento online + admin + multi-tenant)
 - **Stack:** Next.js 16.2.9 (App Router + Turbopack) · Prisma 7.8 · PostgreSQL (Supabase) · Tailwind v4 · shadcn/ui
 - **Deploy:** Vercel — `https://barberplan-nine.vercel.app`
-- **Repositório:** local em `C:\Users\gabri\Downloads\paineis\barberplan`
+- **Repositório:** `https://github.com/gbzinxlhs/barberplan.git`
+- **Domínio:** Em `*.vercel.app` — middleware de subdomínio pronto para custom domain
 
 ---
 
@@ -12,39 +13,54 @@
 
 ### Rotas (src/app/)
 ```
-/                         → Landing page (pública, escura/clara alternada)
-/[tenant]                 → Página pública da barbearia (SSR, dados do BD)
-/[tenant]/agendar         → Booking flow (multi-step, client-side)
-/admin                    → Dashboard (protegido — sem auth ainda)
-/admin/agendamentos       → Lista de agendamentos com filtro de data
-/admin/servicos           → CRUD de serviços
-/admin/barbeiros          → CRUD de barbeiros
-/admin/financeiro         → Relatórios financeiros
-/admin/configuracoes      → Configurações da barbearia
-/admin/cadastro           → Signup de novo tenant
-/api/appointments         → GET (listar por tenant+data) / POST (criar)
-/api/appointments/[id]    → PATCH (status) / DELETE
-/api/tenants/[slug]       → GET (tenant + services + barbers)
+/                              → Landing page (Devskin-inspired, SaasUserProvider)
+/[tenant]                      → Vitrine pública da barbearia (SSR, Figaro-style)
+/[tenant]/agendar              → Booking flow (5-step: login→serviço→barbeiro→data/hora→confirmar)
+/[tenant]/meus-agendamentos    → Histórico do cliente + cancelar + logout
+/admin                         → Dashboard admin (lê tenant do usuário logado)
+/admin/agendamentos            → Todos agendamentos, ordem cronológica, sem filtro de data
+/admin/servicos                → CRUD de serviços com toggle ativo + remover
+/admin/barbeiros               → CRUD de barbeiros com toggle ativo
+/admin/clientes                → Lista de todos SAAS users cadastrados
+/admin/financeiro              → Relatórios financeiros (mock)
+/admin/configuracoes           → Configurações da barbearia
+/admin/cadastro                → Signup de novo tenant (quebra — POST em /api/tenents não existe)
+/admin/setup                   → Setup pós-compra: nome, endereço, WhatsApp, Instagram
+/checkout                      → Checkout com login inline + trial grátis ou Pix via Asaas
+/api/appointments              → GET (listar por tenant+data+barberId) / POST (criar)
+/api/appointments/[id]         → PATCH (status) / DELETE
+/api/tenants/[slug]            → GET (tenant + services + barbers + workingHours) / PATCH (atualizar)
+/api/services                  → GET (por tenant) / POST (criar)
+/api/services/[id]             → PATCH / DELETE
+/api/barbers                   → GET (por tenant) / POST (criar)
+/api/barbers/[id]              → PATCH / DELETE
+/api/customers/validate        → POST (login por name+phone)
+/api/customers/[id]/appointments → GET (histórico do cliente)
+/api/saas-users                → GET (by email, com tenant) / POST (criar/atualizar)
+/api/saas-users/me             → GET (by email, com tenant — usado pelo refreshUser)
+/api/saas-users/list           → GET (todos SAAS users com tenant — admin)
+/api/saas-users/purchase       → POST (cria tenant se necessário, ativa plano)
+/api/asaas/create-payment      → POST (cria Asaas customer + Pix payment)
+/api/asaas/webhook             → POST (recebe confirmação de pagamento Asaas)
+/api/seed                      → GET (popula tenant "brooklyn" com dados de exemplo)
+/api/ping                      → GET (keep-alive para Supabase Free)
 ```
 
 ### Middleware (src/middleware.ts)
-- Rewrite de subdomínios para `/[subdomain]`
-- Ignora `localhost` e `vercel.app` (não trata como tenant)
-- Ignora rotas `/_next`, `/api`, `/admin`
+- Rewrite de subdomínios `[slug].seudominio.com` → `/[slug]`
+- Ignora `/_next`, `/api`, `/admin`, `localhost`, `vercel.app`
+- Precisa de custom domain para wildcard funcionar
 
 ### Banco (Prisma — schema.prisma)
 ```
-Tenant ──→ User, Service, Barber, Customer, Appointment, Product, WorkingHour, Transaction
+Tenant ──→ SaasUser, Service, Barber, Customer, Appointment, WorkingHour
+SaasUser ─→ Tenant (opcional)
 ```
-- `Tenant`: slug único, subdomain único, cor primária configurável
-- `Appointment`: liga a Service, Barber, Customer via FK
-- `Customer`: unique por `[phone, tenantId]`
+- `Tenant`: slug único, dados da barbearia (name, address, phone, whatsapp, instagram)
+- `SaasUser`: email único, name, surname, phone, plan, planExpiresAt, tenantId opcional
+- `Appointment`: liga a Service, Barber, Customer, paymentMethod (PIX/DINHEIRO/CARTAO)
+- `Customer`: unique por `[phone, tenantId]`, identificado por name+phone (login)
 - `WorkingHour`: unique por `[tenantId, dayOfWeek]`
-
-### Infra
-- **Prisma adapter:** `@prisma/adapter-pg` (connection string direta)
-- **Singleton:** PrismaClient em `src/lib/prisma.ts` (globalThis pattern)
-- **Ambiente:** `.env` com `DATABASE_URL` (password com `%3F` = `?` URL-encoded)
 
 ---
 
@@ -58,188 +74,185 @@ Tenant ──→ User, Service, Barber, Customer, Appointment, Product, WorkingH
 - **Bordas:** `zinc-800` (escuro), `zinc-200` (claro)
 
 ### Tema (globals.css)
-Variáveis CSS via `@theme inline` — `--color-background`, `--color-primary`, etc.
-Usamos classes utilitárias do Tailwind (ex: `bg-zinc-950`, `text-zinc-900`) em vez de `bg-background/text-foreground` para ter controle explícito entre seções claras e escuras.
+- Variáveis CSS via `@theme inline`
+- Animações personalizadas: `animate-float`, `animate-sway`, `animate-spin-slow`, `animate-drift`, `animate-glow-pulse`
 
-### Componentes de UI (shadcn/ui)
-`src/components/ui/`: badge, button, card, input, label, select
-- **Button:** `variant="outline"` / `variant="ghost"` / `variant="destructive"` + `size="sm"` / `size="icon"`
-- **Card:** `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`
-- **Select:** `<Select options={[...]} value={...} onChange={...} />`
+### Componentes de UI (shadcn/ui customizados)
+- `Button`: outline usa `bg-white text-zinc-700` (corrigido — não `bg-background`)
+- `Input`, `Label`, `Select`, `Badge`, `Card`
 
 ### Ícones Decorativos (src/components/barber-icons.tsx)
-8 SVGs inline com `fill="currentColor"`/`stroke="currentColor"`:
-`BarberPole`, `BarberChair`, `ScissorsIcon`, `Comb`, `StraightRazor`, `Mustache`, `HairClipper`, `ShavingBrush`, `BadgePremium`, `Razor`
-
-Usados como elementos decorativos com `opacity-[0.03]` a `opacity-[0.06]` espalhados pelas páginas.
+10 SVGs inline: `BarberPole`, `BarberChair`, `ScissorsIcon`, `Comb`, `StraightRazor`, `Mustache`, `HairClipper`, `ShavingBrush`, `BadgePremium`, `Razor`
 
 ### Utilitários (src/lib/utils.ts)
-- `cn()` — clsx + tailwind-merge
-- `formatCurrency(value)` — `R$ 1.234,56` (pt-BR, BRL)
-- `formatDate(date)`, `formatTime(date)`
+- `cn()`, `formatCurrency()`, `formatDate()`, `formatTime()`
 
 ---
 
-## Landing Page (src/app/page.tsx)
+## Páginas Públicas
 
-### Estrutura
-1. **Header** — logo + "Acessar" + "Planos" (fundo branco)
-2. **Hero** — escuro (zinc-950) com título + CTA + ilustração (ícones decorativos)
-3. **Stats** — claro (white) com 3 cards (500+ barbearias, 10k+ agendamentos, 98% satisfação)
-4. **Como Funciona** — escuro com 4 steps + mockup "Barbearia do Zé"
-5. **Funcionalidades** — claro com grid 3x2 de features + ícones de barbearia
-6. **Planos** — escuro com 3 plans (Starter R$49/R$499, Pro R$99/R$999, Enterprise R$199/R$1999)
-7. **CTA Final** — claro
-8. **Footer** — escuro
+### Landing Page (src/app/page.tsx) — Devskin-inspired
+- Wrapped em `SaasUserProvider` + `HomeContent` (use client para FAQ)
+- Seções alternam dark/light com badges de seção ("DESTAQUES", "ENTREGÁVEIS", etc.)
+- Steps numerados (01-05), grid cards, FAQ accordion, planos com CTA para `/checkout`
+- Botão "SaasLogin" no header (modal portal para criar/entrar)
 
-### Padrão de Seções
-- Seções alternam entre `bg-zinc-950` (escuro) e `bg-white` (claro)
-- Ícones decorativos em cada seção com `pointer-events-none`
-- Botões CTA usam `bg-primary text-primary-foreground`
-- Botões secundários usam `border border-zinc-700 text-zinc-300 hover:bg-zinc-800`
+### Vitrine `[tenant]/page.tsx` — Figaro Barbearia style
+- Hero escuro "Os melhores serviços em barbearia" com logos SVG animados
+- Serviços em cards de categoria com ícones (Scissors,User,Sparkles etc.)
+- Cards de barbeiros com iniciais em círculo
+- Horários de funcionamento e seção de contato com ícones
+- CustomerStatus component (mostra login do cliente no header)
+
+### Booking `[tenant]/agendar/page.tsx`
+- Step 0: login do cliente (nome + WhatsApp, salvo em localStorage como `customer_{tenantSlug}`)
+- Step 1: serviço (filtro por categoria com badges)
+- Step 2: barbeiro
+- Step 3: calendário 14 dias + horários disponíveis (bloqueia slots ocupados via API)
+- Step 4: confirmação com método de pagamento (Pix/Dinheiro/Cartão)
+- Step 5: sucesso
+
+### Meus Agendamentos `[tenant]/meus-agendamentos/page.tsx`
+- Lista de agendamentos do cliente com status e ações (cancelar)
+- Botão de logout
 
 ---
 
 ## Admin Panel
 
-### Layout (src/app/admin/layout.tsx) — CRIADO NO REDESIGN
-- Sidebar fixa `w-64` com fundo `zinc-950` e navegação vertical
-- 6 itens: Dashboard, Agendamentos, Serviços, Barbeiros, Financeiro, Configurações
-- Item ativo: `bg-primary/10 text-primary` + `ChevronRight`
-- Header breadcrumb: "Brooklyn Barbearia Fortaleza / NomeDaPagina"
-- Conteúdo: `ml-64` com padding `p-6`
-- Decoração sutil: `BarberPole`, `Mustache` no canto da sidebar
-
-### Páginas — Padrão de Design
-- Todas usam `"use client"` com dados mock (exceção: cadastro faz POST real)
-- Decoração: `BarberPole` + `Mustache` fixos com `opacity-[0.015]`
-- Cabeçalho: título + subtítulo descritivo
-- Cards: `bg-white rounded-xl border border-zinc-200 shadow-sm` com `hover:shadow-md hover:-translate-y-0.5`
-- Botões: ícone + texto, tamanhos consistentes
-- Tabelas: `bg-zinc-50` no header, `hover:bg-zinc-50` nas linhas
+### Layout (src/app/admin/layout.tsx)
+- Wrapped em `SaasUserProvider`
+- Sidebar fixa `w-64` zinc-950 com navegação vertical
+- 7 itens: Dashboard, Agendamentos, Serviços, Barbeiros, **Clientes**, Financeiro, Configurações
+- Exibe nome do tenant + plano + botão "Sair" (logout do SaasUser)
+- Breadcrumb no header com nome da barbearia dinâmico
+- **Todas as páginas admin lêem tenant do `useSaasUser()` — sem "brooklyn" hardcoded**
 
 ### Dashboard (src/app/admin/page.tsx)
-- 4 SummaryCards: Calendar (blue), Clock (amber), CheckCircle2 (emerald), XCircle (red)
-- `colorMap` resolve nome da cor para classes Tailwind (evita classes dinâmicas)
-- Agenda de hoje: lista com hora, cliente, barbeiro, badge de status
-- Skeleton loading (3 pulsando), estado vazio com ícone
-- 4 Quick Links: Agendamentos, Serviços, Barbeiros, Financeiro
+- Summary cards, agenda de hoje, quick links
+- Lê appointments do tenant logado
 
 ### Agendamentos (src/app/admin/agendamentos/page.tsx)
-- Date picker com navegação `ChevronLeft`/`ChevronRight` e botão "Hoje"
-- Barra de resumo: bolinhas coloridas com contagens
-- Grid de appointments: horário (Clock), cliente (User + Phone), serviço (Scissors)
-- Ações: Confirmar (emerald), Finalizar (emerald), Cancelar (red)
-- Status badges: `bg-emerald-50 text-emerald-700` / `bg-amber-50` / `bg-red-50` / `bg-zinc-100`
+- Todos agendamentos, todos status, ordem cronológica
+- Ações: Confirmar, Finalizar, Cancelar
 
 ### Serviços (src/app/admin/servicos/page.tsx)
-- Tabela com scroll horizontal
-- Categoria em badge `bg-zinc-100 rounded-full`
-- Ativo/Inativo: botão toggle com badge verde/cinza + ícone Power
-- Botão Editar com ícone Pencil
-- Formulário inline (3 colunas: preço, duração, categoria select)
+- CRUD completo: criar, editar, toggle ativo, **remover** (com confirmação)
 
 ### Barbeiros (src/app/admin/barbeiros/page.tsx)
-- Cards em grid `sm:grid-cols-2 lg:grid-cols-3`
-- Avatar: iniciais do nome em círculo colorido (cores cíclicas)
-- Bio truncada com `truncate`
-- Ações: Editar (outline, full width), Ativar/Desativar (ghost, cor dinâmica)
-- Card inativo: `opacity-50`
+- CRUD completo: criar, editar, toggle ativo
 
-### Financeiro (src/app/admin/financeiro/page.tsx)
-- 4 stats cards com indicador de crescimento (seta verde + percentual)
-- Gráfico de barras horizontal (CSS puro, `style={{ width: '%' }}`) — serviços por faturamento
-- Comissões por barbeiro com avatar inicial
-- Transações recentes em tabela com badge de método
-- `maxServiceTotal` usado para proporção das barras
+### Clientes (src/app/admin/clientes/page.tsx)
+- Lista todos SAAS users com nome, email, telefone, plano, barbearia, expiração, cadastro
+- Requer `GET /api/saas-users/list`
 
-### Configurações (src/app/admin/configuracoes/page.tsx)
-- 3 cards: Informações, Horários, Comissão
-- Ícones nos labels: Store, Phone, MapPin, Globe, Clock, Percent
-- Inputs de horário com `focus:ring-2 focus:ring-zinc-900/10`
-- Botão salvar com estado de sucesso: `bg-emerald-600` + `CheckCircle2`
-
-### Cadastro (src/app/admin/cadastro/page.tsx) — NÃO USA O LAYOUT ADMIN
-- Full-screen centrado, fundo `zinc-950`
-- Card max-w-md com formulário de signup
-- Slug formatado: `toLowerCase().replace(/[^a-z0-9-]/g, "")`
-- POST para `/api/tenants` (rota que **não existe** — apenas GET em `[slug]`)
-- Redireciona para `/admin?tenant={slug}`
+### Setup Pós-Compra (src/app/admin/setup/page.tsx)
+- Formulário: nome da barbearia, endereço, telefone, WhatsApp, Instagram
+- Botão "Salvar e Continuar" → redireciona para serviços/barbeiros
+- Requer `PATCH /api/tenants/[slug]`
 
 ---
 
-## Fluxo de Agendamento (Público) — REDESIGNADO
+## SAAS (Multi-tenant)
 
-### Página do Tenant `[tenant]/page.tsx` (SSR)
-- Hero com branding: logo ou inicial, nome, endereço, links (tel, WhatsApp, Instagram)
-- Serviços agrupados por categoria com badges de duração e preço destacado
-- Equipe: cards com iniciais coloridas ou foto, bio
-- Horários de funcionamento (lidos do `WorkingHour` no BD)
-- Seção de localização/contato com ícones
-- Footer com CTA "Agende seu Horário"
-- Ícones decorativos de barbearia espalhados (`opacity-[0.06]`)
-- Cor primária do tenant aplicada dinamicamente nos botões e destaques
+### Modelo SaasUser
+- Cadastro: name, surname, email, phone
+- Planos: `free`, `starter_trial`, `starter`, `pro`
+- `planExpiresAt` controla validade
+- `tenantId` opcional — vincula à barbearia criada
 
-### Página de Booking `[tenant]/agendar/page.tsx` (CSR)
-- Multi-step: Serviço → Barbeiro → Data/Horário → Dados → Confirmação
-- **Step 1:** Serviços com filtro por categoria (badges "Todos" + categorias) — cores dinâmicas
-- **Step 2:** Barbeiros com avatar de iniciais, nome e bio
-- **Step 3:** Calendário 14 dias + horários calculados dos `WorkingHours` do tenant (lidos via API)
-  - Slots já agendados (não-cancelados) aparecem riscados e desabilitados (`bookedTimes`)
-  - Fetch para `GET /api/appointments?tenant=&date=&barberId=`
-- **Step 4:** Formulário nome/WhatsApp + resumo do agendamento (serviço, barbeiro, data, horário, valor)
-- Spinner de loading com animação `animate-spin`
-- Tela de sucesso com checkmark, resumo e botão "Novo Agendamento"
-- Ícones decorativos (`BarberPole`, `Comb`) fixos no fundo
+### Fluxo de Checkout (/checkout)
+1. **Não logado:** mostra formulário de cadastro/login inline (POST `/api/saas-users`)
+2. **Logado + Trial:** confirma → cria tenant + ativa 14 dias grátis → redireciona setup
+3. **Logado + Pago:** solicita CPF/CNPJ → gera Pix via Asaas → mostra QR Code
+4. Webhook Asaas confirma pagamento → ativa plano
 
-### API — `/api/tenants/[slug]` (modificada)
-- Agora retorna também `workingHours` (WorkingHour[] ordenado por dayOfWeek)
-- Usado pelo booking page para calcular horários disponíveis reais
+### Asaas Integration (src/lib/asaas.ts)
+- `createCustomer`, `findCustomerByEmail`, `updateCustomer`, `createPixPayment`, `getPayment`
+- API v3, endpoint sandbox/production via env
+- Cliente existente é atualizado com CPF se necessário
+- `POST /api/asaas/create-payment` — gera QR Code Pix
+- `POST /api/asaas/webhook` — recebe confirmação, ativa plano
 
-### API — `GET /api/appointments` (modificada)
-- Agora aceita `barberId` como query param para filtrar por barbeiro
-- Filtra appointment com `status !== "cancelled"` para não mostrar slots cancelados como ocupados
-- Usado pelo booking page para bloquear slots já preenchidos
+### Sessão
+- **SAAS:** `saas_user` + `saas_tenant` no localStorage
+- **Cliente (customer):** `customer_{tenantSlug}` no localStorage
+- `SaasUserContext` + `useSaasUser()` hook (src/contexts/saas-user.tsx)
 
 ---
 
-## Pontos de Atenção / Issues Conhecidas
+## Animações (globals.css)
+
+```css
+@keyframes float      { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+@keyframes sway       { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+@keyframes spin-slow  { to{transform:rotate(360deg)} }
+@keyframes drift      { 0%,100%{transform:translate(0,0)} 25%{transform:translate(10px,-10px)} 50%{transform:translate(20px,0)} 75%{transform:translate(10px,10px)} }
+@keyframes glow-pulse { 0%,100%{opacity:.3} 50%{opacity:.8} }
+```
+
+Aplicadas via `className="animate-float"` etc. nos ícones decorativos da vitrine.
+
+---
+
+## Configuração de Ambiente (Vercel)
+
+| Variável | Valor |
+|----------|-------|
+| `DATABASE_URL` | Conexão Supabase (session pooler) |
+| `ASAAS_API_KEY` | `$aact_hmlg_000M...` (sandbox) |
+| `ASAAS_ENVIRONMENT` | `sandbox` |
+
+---
+
+## Serviços Externos
+
+| Serviço | URL | Uso |
+|---------|-----|-----|
+| **Supabase** | (via connection string) | Banco PostgreSQL Free |
+| **Asaas Sandbox** | https://sandbox.asaas.com | Pagamentos Pix (testes) |
+| **cron-job.org** | https://cron-job.org | Ping `/api/ping` a cada 10min (keep-alive) |
+| **Vercel** | https://vercel.com/barb-plan/barberplan | Deploy e domínio |
+
+---
+
+## Pontos de Atenção
 
 ### 🚨 CRÍTICO
-- **`/api/tenants` POST não existe** — a rota `[slug]` só implementa GET. A página de cadastro tenta POST em `/api/tenants` (sem slug), que retorna 404. Precisa criar `src/app/api/tenants/route.ts` com POST para criar tenant + usuário.
-- **Login/auth não implementado** — next-auth instalado mas não configurado. Qualquer um acessa `/admin`.
-- **Dados mock** — todas as páginas admin usam dados mock, não leem do banco (exceto agendamentos que faz fetch da API).
+- **`/api/tenants` POST não existe** — a página `/admin/cadastro` tenta POST em `/api/tenants` (sem slug) que retorna 404. Precisa criar `src/app/api/tenants/route.ts`.
+- **Sem proteção de admin** — qualquer um que acessar `/admin` vê dados. SaasUser login é apenas visual (localStorage), sem JWT/session real.
+- **Asaas em sandbox** — Pix só funciona no sandbox. Para produção, trocar `ASAAS_ENVIRONMENT` para `production` e usar chave real.
 
 ### 🟡 MÉDIO
-- **Tenant slug hardcoded** — "brooklyn" está fixo nas URLs de fetch nos componentes admin.
-- **Sem verificação de tenant no admin** — o layout assume "Brooklyn Barbearia Fortaleza" fixo.
-- **`prisma.config.ts`** — existe na raiz mas não sabemos o conteúdo (gerado pelo Prisma 7).
+- **`/admin/clients` lista TODOS os SAAS users sem restrição** — qualquer admin logado vê todos os clientes do sistema.
+- **Prisma `createdAt` no SaasUser** — precisa verificar se o campo existe no schema (model tem `createdAt` e `updatedAt` com `@default(now())` e `@updatedAt`).
 - **Booking não valida conflito de horário real** — usa `status !== "cancelled"` para blocked slots, mas não considera buffer entre agendamentos.
-- **Sem paginação na lista de serviços** — se houver muitos serviços, a página fica longa.
 
 ### 🟢 MELHORIAS FUTURAS
-- Adicionar autenticação (next-auth com credentials provider)
+- Adicionar autenticação real (JWT/cookies) para SAAS users e admin
 - Criar rota `POST /api/tenants` para cadastro funcional
-- Substituir dados mock por dados reais do banco nas páginas admin
-- Pegar tenant slug dinamicamente (via header/middleware ou session)
-- Adicionar loading states e error boundaries
-- Adicionar confirmação visual nos CRUDs (toast/notificação)
+- `prisma db push` precisa rodar sempre que schema mudar no banco de produção
+- Migrar de `vercel.app` para domínio próprio com wildcard DNS
+- Adicionar paginação na lista de serviços e clientes
 - Responsividade mobile do admin (sidebar colapsável)
 - Buffer entre agendamentos (ex: 15 min de folga)
 - Página pública de confirmação/cancelamento para o cliente
+- Notificações via WhatsApp (lembrete de agendamento)
 
 ---
 
 ## Comandos Úteis
 ```bash
-npm run dev          # Desenvolvimento (localhost:3000)
-npm run build        # Build de produção
-npx prisma db push   # Sincronizar schema com banco
-npx prisma generate  # Gerar Prisma Client
-npx prisma studio    # UI do banco
-vercel --prod --yes  # Deploy direto
+npm run dev                   # Desenvolvimento (localhost:3000)
+npm run build                 # Build de produção
+npx prisma db push            # Sincronizar schema com banco
+npx prisma generate           # Gerar Prisma Client
+npx prisma studio             # UI do banco
+git add -A; git commit -m "..."; git push origin main
+vercel deploy --prod          # Deploy na Vercel
+vercel env add NOME prod      # Adicionar variável de ambiente
 ```
 
-## Arquivos Ignorados (não commitados)
+## Arquivos Ignorados
 - `.env` — contém DATABASE_URL (supabase)
 - `node_modules/`, `.next/`
