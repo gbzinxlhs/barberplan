@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createCustomer, findCustomerByEmail, createPixPayment } from "@/lib/asaas";
+import { createCustomer, findCustomerByEmail, updateCustomer, createPixPayment } from "@/lib/asaas";
 
 export async function POST(request: Request) {
   try {
@@ -30,12 +30,18 @@ export async function POST(request: Request) {
     dueDate.setDate(dueDate.getDate() + 3);
 
     let asaasCustomer = await findCustomerByEmail(email);
-    if (!asaasCustomer) {
+    if (asaasCustomer) {
+      if (cpfCnpj) {
+        asaasCustomer = await updateCustomer(asaasCustomer.id, {
+          cpfCnpj: cpfCnpj.replace(/\D/g, ""),
+        });
+      }
+    } else {
       asaasCustomer = await createCustomer({
         name: `${user.name} ${user.surname}`,
         email: user.email,
         phone: user.phone,
-        cpfCnpj: cpfCnpj || undefined,
+        cpfCnpj: cpfCnpj ? cpfCnpj.replace(/\D/g, "") : undefined,
       });
     }
 

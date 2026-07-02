@@ -56,6 +56,18 @@ export async function findCustomerByEmail(email: string): Promise<AsaasCustomer 
   return data.data?.[0] || null;
 }
 
+export async function updateCustomer(id: string, data: {
+  name?: string;
+  email?: string;
+  phone?: string;
+  cpfCnpj?: string;
+}): Promise<AsaasCustomer> {
+  return asaasFetch(`/customers/${id}`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 export async function createPixPayment(data: {
   customer: string;
   value: number;
