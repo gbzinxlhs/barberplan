@@ -21,5 +21,20 @@ export async function GET(
     where: { tenantId: tenant.id, active: true },
   });
 
-  return NextResponse.json({ tenant, services, barbers });
+  const workingHours = await prisma.workingHour.findMany({
+    where: { tenantId: tenant.id },
+    orderBy: { dayOfWeek: "asc" },
+  });
+
+  return NextResponse.json({ tenant, services, barbers, workingHours });
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
+  const body = await request.json();
+  const tenant = await prisma.tenant.update({ where: { slug }, data: body });
+  return NextResponse.json({ tenant });
 }

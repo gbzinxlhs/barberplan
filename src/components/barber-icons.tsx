@@ -1,6 +1,6 @@
-export function BarberPole({ className }: { className?: string }) {
+export function BarberPole({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 32 120" className={className} fill="none">
+    <svg viewBox="0 0 32 120" className={className} style={style} fill="none">
       <rect x="6" y="2" width="20" height="116" rx="4" className="fill-zinc-800" />
       <rect x="4" y="0" width="24" height="6" rx="3" className="fill-zinc-600" />
       <rect x="4" y="114" width="24" height="6" rx="3" className="fill-zinc-600" />
@@ -27,9 +27,9 @@ export function BarberPole({ className }: { className?: string }) {
   );
 }
 
-export function BarberChair({ className }: { className?: string }) {
+export function BarberChair({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 160 200" className={className} fill="none">
+    <svg viewBox="0 0 160 200" className={className} style={style} fill="none">
       <rect x="50" y="170" width="60" height="8" rx="3" className="fill-zinc-600" />
       <rect x="40" y="148" width="80" height="24" rx="4" className="fill-zinc-700" />
       <rect x="54" y="120" width="52" height="30" rx="3" className="fill-zinc-700" />
@@ -46,9 +46,9 @@ export function BarberChair({ className }: { className?: string }) {
   );
 }
 
-export function ScissorsIcon({ className }: { className?: string }) {
+export function ScissorsIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 60 60" className={className} fill="none">
+    <svg viewBox="0 0 60 60" className={className} style={style} fill="none">
       <circle cx="14" cy="14" r="6" className="fill-zinc-600" />
       <circle cx="14" cy="46" r="6" className="fill-zinc-600" />
       <circle cx="14" cy="14" r="3" className="fill-zinc-500" />
@@ -61,9 +61,9 @@ export function ScissorsIcon({ className }: { className?: string }) {
   );
 }
 
-export function Comb({ className }: { className?: string }) {
+export function Comb({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 120 40" className={className} fill="none">
+    <svg viewBox="0 0 120 40" className={className} style={style} fill="none">
       <rect x="0" y="4" width="84" height="6" rx="3" className="fill-zinc-700" />
       <rect x="0" y="14" width="84" height="6" rx="3" className="fill-zinc-700" />
       <rect x="0" y="24" width="54" height="6" rx="3" className="fill-zinc-700" />
@@ -81,9 +81,9 @@ export function Comb({ className }: { className?: string }) {
   );
 }
 
-export function StraightRazor({ className }: { className?: string }) {
+export function StraightRazor({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 100 30" className={className} fill="none">
+    <svg viewBox="0 0 100 30" className={className} style={style} fill="none">
       <path d="M82 4 L56 14 L54 16 L58 20 L80 12 Q88 8 82 4Z" className="fill-zinc-600" />
       <path d="M82 4 L56 14 L54 16 L58 20 L80 12 Q88 8 82 4Z" className="fill-zinc-500" opacity="0.5" />
       <rect x="12" y="12" width="40" height="6" rx="2" className="fill-zinc-700" />
@@ -94,18 +94,18 @@ export function StraightRazor({ className }: { className?: string }) {
   );
 }
 
-export function Mustache({ className }: { className?: string }) {
+export function Mustache({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 100 40" className={className} fill="none">
+    <svg viewBox="0 0 100 40" className={className} style={style} fill="none">
       <path d="M10 20 Q10 4 30 8 Q40 12 50 20 Q60 12 70 8 Q90 4 90 20 Q90 30 80 34 Q70 36 50 28 Q30 36 20 34 Q10 30 10 20Z" className="fill-zinc-700" />
       <path d="M10 20 Q10 10 30 12 Q40 14 50 20 Q60 14 70 12 Q90 10 90 20" className="fill-zinc-600" />
     </svg>
   );
 }
 
-export function HairClipper({ className }: { className?: string }) {
+export function HairClipper({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 80 50" className={className} fill="none">
+    <svg viewBox="0 0 80 50" className={className} style={style} fill="none">
       <rect x="4" y="14" width="40" height="24" rx="6" className="fill-zinc-700" />
       <rect x="8" y="18" width="32" height="16" rx="3" className="fill-zinc-600" />
       <rect x="12" y="20" width="24" height="12" rx="2" className="fill-zinc-500" />
@@ -124,9 +124,9 @@ export function HairClipper({ className }: { className?: string }) {
   );
 }
 
-export function BadgePremium({ className }: { className?: string }) {
+export function BadgePremium({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 60 60" className={className} fill="none">
+    <svg viewBox="0 0 60 60" className={className} style={style} fill="none">
       <circle cx="30" cy="30" r="28" className="fill-zinc-800" stroke="currentColor" strokeWidth="1" />
       <circle cx="30" cy="30" r="22" className="fill-zinc-700" />
       <path d="M30 10 L34 22 L46 22 L36 30 L40 42 L30 34 L20 42 L24 30 L14 22 L26 22Z" className="fill-primary" />
@@ -135,9 +135,9 @@ export function BadgePremium({ className }: { className?: string }) {
   );
 }
 
-export function ShavingBrush({ className }: { className?: string }) {
+export function ShavingBrush({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 40 80" className={className} fill="none">
+    <svg viewBox="0 0 40 80" className={className} style={style} fill="none">
       <rect x="12" y="52" width="16" height="24" rx="4" className="fill-zinc-700" />
       <rect x="14" y="54" width="12" height="20" rx="2" className="fill-zinc-600" />
       <ellipse cx="20" cy="50" rx="16" ry="6" className="fill-zinc-700" />
@@ -150,9 +150,9 @@ export function ShavingBrush({ className }: { className?: string }) {
   );
 }
 
-export function Razor({ className }: { className?: string }) {
+export function Razor({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 100 24" className={className} fill="none">
+    <svg viewBox="0 0 100 24" className={className} style={style} fill="none">
       <rect x="40" y="6" width="56" height="12" rx="3" className="fill-zinc-700" />
       <rect x="44" y="8" width="48" height="8" rx="2" className="fill-zinc-600" />
       <path d="M40 12 L32 6 L28 6 L36 14 L40 14Z" className="fill-zinc-600" />

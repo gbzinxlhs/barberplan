@@ -4,14 +4,25 @@ import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BarberPole, Mustache, Razor, ScissorsIcon } from "@/components/barber-icons";
+import {
+  Calendar,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  ArrowRight,
+  Users,
+  DollarSign,
+  Scissors,
+  Sparkles,
+} from "lucide-react";
+import { useSaasUser } from "@/contexts/saas-user";
 
-const statusVariant: Record<string, "success" | "warning" | "destructive" | "default"> = {
-  confirmed: "success",
-  pending: "warning",
-  cancelled: "destructive",
-  completed: "default",
+const statusStyle: Record<string, string> = {
+  confirmed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  cancelled: "bg-red-50 text-red-700 border-red-200",
+  completed: "bg-zinc-100 text-zinc-600 border-zinc-200",
 };
 
 const statusLabel: Record<string, string> = {
@@ -21,162 +32,222 @@ const statusLabel: Record<string, string> = {
   completed: "Finalizado",
 };
 
+const colorMap: Record<string, { bg: string; icon: string }> = {
+  blue: { bg: "bg-blue-500", icon: "text-blue-500" },
+  amber: { bg: "bg-amber-500", icon: "text-amber-500" },
+  emerald: { bg: "bg-emerald-500", icon: "text-emerald-500" },
+  red: { bg: "bg-red-500", icon: "text-red-500" },
+  purple: { bg: "bg-purple-500", icon: "text-purple-500" },
+  orange: { bg: "bg-orange-500", icon: "text-orange-500" },
+};
+
+const quickLinks = [
+  { href: "/admin/agendamentos", label: "Agendamentos", icon: Calendar, desc: "Gerencie horários e confirmações", color: "purple" },
+  { href: "/admin/servicos", label: "Serviços", icon: Scissors, desc: "Preços, durações e categorias", color: "emerald" },
+  { href: "/admin/barbeiros", label: "Barbeiros", icon: Users, desc: "Equipe e escala", color: "blue" },
+  { href: "/admin/financeiro", label: "Financeiro", icon: DollarSign, desc: "Faturamento e relatórios", color: "orange" },
+];
+
 export default function AdminDashboard() {
+  const { tenant } = useSaasUser();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const today = format(new Date(), "yyyy-MM-dd");
+  const tenantSlug = tenant?.slug;
 
   useEffect(() => {
-    fetch(`/api/appointments?tenant=brooklyn&date=${today}`)
+    if (!tenantSlug) return;
+    fetch(`/api/appointments?tenant=${tenantSlug}&date=${today}`)
       .then((res) => res.json())
       .then((data) => {
         setAppointments(data.appointments || []);
         setLoading(false);
       });
-  }, [today]);
+  }, [today, tenantSlug]);
+
+  const confirmed = appointments.filter((a) => a.status === "confirmed").length;
+  const completed = appointments.filter((a) => a.status === "completed").length;
+  const cancelled = appointments.filter((a) => a.status === "cancelled").length;
+  const pending = appointments.filter((a) => a.status === "pending").length;
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <AdminHeader />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-zinc-900 mb-8">Dashboard</h1>
+    <div className="p-6 relative">
+      {/* decorative bg */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-[0.015]">
+        <BarberPole className="absolute top-40 -right-10 w-32 h-80 text-zinc-900" />
+        <Mustache className="absolute bottom-20 left-12 w-20 text-zinc-900" />
+        <Razor className="absolute top-60 left-1/4 w-12 text-zinc-900" />
+        <ScissorsIcon className="absolute top-32 right-1/3 w-16 text-zinc-900" />
+      </div>
 
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: "Agendamentos Hoje", value: appointments.length, color: "bg-blue-500" },
-            { label: "Confirmados", value: appointments.filter((a) => a.status === "confirmed").length, color: "bg-green-500" },
-            { label: "Finalizados", value: appointments.filter((a) => a.status === "completed").length, color: "bg-zinc-500" },
-            { label: "Cancelados", value: appointments.filter((a) => a.status === "cancelled").length, color: "bg-red-500" },
-          ].map((item) => (
-            <Card key={item.label}>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                  <div>
-                    <p className="text-sm text-zinc-500">{item.label}</p>
-                    <p className="text-2xl font-bold text-zinc-900">{item.value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      {/* header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900">Dashboard</h1>
+          <p className="text-sm text-zinc-500 mt-1">
+            {format(new Date(), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          </p>
         </div>
+        <Link
+          href="/admin/agendamentos"
+          className="hidden sm:flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white text-sm rounded-lg hover:bg-zinc-800 transition-colors"
+        >
+          <Calendar className="size-4" />
+          Novo Agendamento
+        </Link>
+      </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Agenda de Hoje</CardTitle>
-            <Link href="/admin/agendamentos" className="text-sm text-zinc-500 hover:text-zinc-900">
-              Ver todos →
-            </Link>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-zinc-400 text-sm">Carregando...</p>
-            ) : appointments.length === 0 ? (
-              <p className="text-zinc-400 text-sm">Nenhum agendamento para hoje</p>
-            ) : (
-              <div className="space-y-3">
-                {appointments.map((apt) => (
-                  <div
-                    key={apt.id}
-                    className="flex items-center justify-between p-3 bg-zinc-50 rounded-lg border border-zinc-200"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-semibold text-zinc-700 min-w-[60px]">
+      {/* summary cards */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <SummaryCard
+          icon={Calendar}
+          label="Hoje"
+          value={appointments.length}
+          color="blue"
+          trend={appointments.length > 0 ? `${confirmed + completed} ativos` : "0"}
+        />
+        <SummaryCard
+          icon={Clock}
+          label="Pendentes"
+          value={pending}
+          color="amber"
+          trend={`${pending > 0 ? `${pending} aguardam` : "nenhum"}`}
+        />
+        <SummaryCard
+          icon={CheckCircle2}
+          label="Confirmados"
+          value={confirmed}
+          color="emerald"
+          trend={`${((confirmed / (appointments.length || 1)) * 100).toFixed(0)}% do total`}
+        />
+        <SummaryCard
+          icon={XCircle}
+          label="Cancelados"
+          value={cancelled}
+          color="red"
+          trend={cancelled > 0 ? `${((cancelled / (appointments.length || 1)) * 100).toFixed(0)}%` : "0%"}
+        />
+      </div>
+
+      {/* agenda de hoje */}
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm mb-8 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+          <div className="flex items-center gap-2">
+            <Sparkles className="size-4 text-emerald-500" />
+            <h2 className="text-sm font-semibold text-zinc-900">Agenda de Hoje</h2>
+          </div>
+          <Link
+            href="/admin/agendamentos"
+            className="text-xs text-zinc-400 hover:text-zinc-900 flex items-center gap-1 transition-colors"
+          >
+            Ver todos <ArrowRight className="size-3" />
+          </Link>
+        </div>
+        <div className="p-6">
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-16 bg-zinc-50 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          ) : appointments.length === 0 ? (
+            <div className="text-center py-10">
+              <Calendar className="size-10 text-zinc-200 mx-auto mb-3" />
+              <p className="text-sm text-zinc-400">Nenhum agendamento para hoje</p>
+              <p className="text-xs text-zinc-300 mt-1">Os agendamentos aparecerão aqui</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {appointments.map((apt) => (
+                <div
+                  key={apt.id}
+                  className="group flex items-center justify-between p-3 rounded-lg hover:bg-zinc-50 transition-colors border border-transparent hover:border-zinc-200"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-center min-w-[52px]">
+                      <span className="text-sm font-bold text-zinc-800">
                         {format(new Date(apt.startTime), "HH:mm")}
                       </span>
-                      <div>
-                        <p className="text-sm font-medium text-zinc-900">{apt.customer.name}</p>
-                        <p className="text-xs text-zinc-400">
-                          {apt.service.name} — {apt.barber.name}
-                        </p>
-                      </div>
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider">
+                        {format(new Date(apt.startTime), "hh:mm")}
+                      </span>
                     </div>
-                    <Badge variant={statusVariant[apt.status] || "default"}>
-                      {statusLabel[apt.status] || apt.status}
-                    </Badge>
+                    <div className="w-px h-8 bg-zinc-200" />
+                    <div>
+                      <p className="text-sm font-medium text-zinc-900">{apt.customer.name}</p>
+                      <p className="text-xs text-zinc-400">
+                        {apt.service.name}
+                        <span className="mx-1">·</span>
+                        {apt.barber.name}
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="grid md:grid-cols-2 gap-6 mt-8">
-          <Link href="/admin/agendamentos">
-            <Card className="hover:border-zinc-300 transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  📅 Gerenciar Agendamentos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-zinc-500">Visualize, confirme e gerencie todos os agendamentos.</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/admin/servicos">
-            <Card className="hover:border-zinc-300 transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  ✂️ Serviços
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-zinc-500">Gerencie serviços, preços e durações.</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/admin/barbeiros">
-            <Card className="hover:border-zinc-300 transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  💈 Barbeiros
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-zinc-500">Cadastre e gerencie os barbeiros da unidade.</p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/admin/financeiro">
-            <Card className="hover:border-zinc-300 transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  💰 Financeiro
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-zinc-500">Relatórios de faturamento e comissões.</p>
-              </CardContent>
-            </Card>
-          </Link>
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusStyle[apt.status] || "bg-zinc-100 text-zinc-600"}`}>
+                    {statusLabel[apt.status] || apt.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* quick links */}
+      <h2 className="text-sm font-semibold text-zinc-900 mb-4">Navegação Rápida</h2>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {quickLinks.map((link) => {
+          const Icon = link.icon;
+          const c = colorMap[link.color];
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="group bg-white rounded-xl border border-zinc-200 p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+            >
+              <div className={`w-10 h-10 rounded-lg ${c.bg} flex items-center justify-center mb-3`}>
+                <Icon className="size-5 text-white" />
+              </div>
+              <h3 className="text-sm font-semibold text-zinc-900 group-hover:text-zinc-700 transition-colors">
+                {link.label}
+              </h3>
+              <p className="text-xs text-zinc-400 mt-1">{link.desc}</p>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* decorative icon */}
+      <div className="mt-10 flex justify-center opacity-[0.03]">
+        <ScissorsIcon className="w-20 h-auto text-zinc-900" />
       </div>
     </div>
   );
 }
 
-function AdminHeader() {
+function SummaryCard({
+  icon: Icon,
+  label,
+  value,
+  color,
+  trend,
+}: {
+  icon: any;
+  label: string;
+  value: number;
+  color: string;
+  trend: string;
+}) {
+  const c = colorMap[color];
   return (
-    <header className="bg-white border-b border-zinc-200">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-sm font-bold text-white">
-            B
-          </div>
-          <span className="text-lg font-bold text-zinc-900">BarberPlan</span>
-          <span className="text-xs text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded">Admin</span>
+    <div className="group bg-white rounded-xl border border-zinc-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+      <div className="flex items-center justify-between mb-3">
+        <div className={`w-9 h-9 rounded-lg ${c.bg} flex items-center justify-center`}>
+          <Icon className="size-4 text-white" />
         </div>
-        <nav className="flex gap-6 text-sm">
-          <Link href="/admin" className="text-zinc-900 font-medium">Dashboard</Link>
-          <Link href="/admin/agendamentos" className="text-zinc-500 hover:text-zinc-900">Agendamentos</Link>
-          <Link href="/admin/servicos" className="text-zinc-500 hover:text-zinc-900">Serviços</Link>
-          <Link href="/admin/barbeiros" className="text-zinc-500 hover:text-zinc-900">Barbeiros</Link>
-          <Link href="/admin/financeiro" className="text-zinc-500 hover:text-zinc-900">Financeiro</Link>
-          <Link href="/admin/configuracoes" className="text-zinc-500 hover:text-zinc-900">Configurações</Link>
-        </nav>
+        <span className="text-[10px] text-zinc-400 uppercase tracking-wider">{label}</span>
       </div>
-    </header>
+      <p className="text-2xl font-bold text-zinc-900">{value}</p>
+      <p className="text-xs text-zinc-400 mt-1">{trend}</p>
+    </div>
   );
 }

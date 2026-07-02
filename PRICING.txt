@@ -1,0 +1,75 @@
+PRECOS BARBERPLAN
+
+==================
+MERCADO DE SAAS PARA BARBEARIA (BRASIL, 2026)
+==================
+
+Concorrente     | Basico      | Intermediario | Premium
+AgendPro        | R$29        | R$79          | R$189
+BarberCode      | R$72        | R$90          | R$126
+HubBarber       | R$58        | R$80          | R$130
+Calendarius     | R$30        | R$80          | R$150
+BarberPro       | R$40        | R$64          | R$104-237
+
+Internacional (USD): SQUIRE $30-250 | SHIFT $29-79 | Barber-OS $29-89 | Twizzlo $29.99
+
+Publico medio (1.000+ seguidores) paga entre R$60-130/mes (fonte: BarbUp).
+
+
+==================
+CUSTOS DE INFRAESTRUTURA (multi-tenant)
+==================
+
+Item                    | Custo/mes
+Vercel Pro              | ~R$110 ($20)
+Supabase Pro            | ~R$140 ($25)
+Dominios (.com.br)      | ~R$4/dominio
+Total fixo (todos)      | ~R$250/mes
+Custo marginal Starter  | ~R$0
+Custo marginal Pro      | ~R$4 (dominio)
+
+
+==================
+PLANOS RECOMENDADOS
+==================
+
+PLANO STARTER - R$49/mes
+
+- Subdominio: sua-barbearia.barberplan.vercel.app
+- Agendamento online com 5 etapas (servico, barbeiro, data, pagamento, confirmacao)
+- Painel admin completo (dashboard, agendamentos, servicos, barbeiros, financeiro)
+- Metodos de pagamento: Pix, Dinheiro, Cartao
+- Historico do cliente + login por nome/WhatsApp
+- Cancelamento pelo cliente
+- 1 barbearia, ate 3 barbeiros
+
+
+PLANO PRO - R$97/mes
+
+- Dominio proprio (sua-barbearia.com.br)
+- Layout unico personalizado (cores, fontes, identidade visual da barbearia)
+- 2 atualizacoes por mes no layout
+- Barbeiros ilimitados
+- Relatorios financeiros avancados
+- Suporte prioritario
+
+
+==================
+LOGICA FINANCEIRA
+==================
+
+Break-even: 5 clientes Starter (5 x R$49 = R$245) cobrem a infraestrutura.
+
+Margem Starter: R$49 - R$0 = R$49 de margem liquida por cliente.
+
+Margem Pro: R$97 - R$4 (dominio) - ~R$60 (2h de design/desenvolvimento) = ~R$33 de margem liquida por cliente.
+
+
+==================
+PROXIMOS PASSOS
+==================
+
+1. Decidir entre mensalidade fixa (recomendado) vs taxa por agendamento
+2. Oferecer teste gratis de 14 dias (padrao do mercado)
+3. Desconto de 10-20% no plano anual
+4. Adicionar plano Enterprise (R$149+) para franquias multi-unidades depois

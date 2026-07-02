@@ -1,0 +1,96 @@
+============================================
+  GUIA DE DEPLOY - BarberPlan
+  Micro SAAS para Barbearias
+============================================
+
+PRÉ-REQUISITOS:
+- Conta no GitHub (github.com)
+- Conta no Supabase (supabase.com)
+- Conta na Vercel (vercel.com) - login com GitHub
+
+============================================
+PASSO 1: CRIAR REPOSITÓRIO NO GITHUB
+============================================
+
+1. Acesse github.com e faça login
+2. Clique no "+" no canto superior direito → "New repository"
+3. Nome do repositório: barberplan
+4. Deixe como público (Public)
+5. NÃO marque "Add a README", ".gitignore" ou "license"
+6. Clique em "Create repository"
+
+7. No terminal (dentro da pasta barberplan), execute:
+
+   git remote add origin https://github.com/SEU_USUARIO/barberplan.git
+   git branch -M main
+   git push -u origin main
+
+   (substitua SEU_USUARIO pelo seu nome de usuário do GitHub)
+
+============================================
+PASSO 2: CRIAR BANCO DE DADOS NO SUPABASE
+============================================
+
+1. Acesse supabase.com e crie uma conta grátis
+2. Clique em "New project"
+3. Preencha:
+   - Name: barberplan
+   - Database Password: crie uma senha forte e GUARDE
+   - Region: South America (São Paulo) - sa-east-1
+   - Pricing Plan: Free
+4. Clique em "Create new project"
+5. Aguarde de 1 a 2 minutos enquanto o banco é criado
+
+6. Após criar, vá em "Project Settings" (ícone de engrenagem)
+7. No menu lateral, clique em "Database"
+8. Na seção "Connection string", clique em "URI"
+9. Copie a string inteira (começa com postgresql://)
+10. Substitua [YOUR-PASSWORD] pela senha que você criou no passo 3
+
+============================================
+PASSO 3: FAZER DEPLOY NA VERCEL
+============================================
+
+1. Acesse vercel.com e faça login com sua conta do GitHub
+2. Clique em "Add New..." → "Project"
+3. Selecione o repositório "barberplan"
+4. Na tela de configuração:
+   - Framework Preset: Next.js (já deve vir selecionado)
+   - Em "Environment Variables", adicione:
+     * Nome: DATABASE_URL
+     * Valor: cole a string de conexão do Supabase
+5. Clique em "Deploy"
+6. Aguarde o build e deploy (cerca de 2-3 minutos)
+
+============================================
+PASSO 4: RODAR AS MIGRATIONS
+============================================
+
+Após o deploy, no terminal do seu computador, execute:
+
+   npx prisma db push
+
+Isso vai criar todas as tabelas no banco de dados do Supabase.
+
+============================================
+ACESSANDO O SISTEMA
+============================================
+
+Após o deploy, sua URL será:
+https://barberplan.vercel.app
+
+Páginas disponíveis:
+- Landing page:    https://barberplan.vercel.app
+- Página Brooklyn: https://barberplan.vercel.app/brooklyn
+- Agendamento:     https://barberplan.vercel.app/brooklyn/agendar
+- Painel Admin:    https://barberplan.vercel.app/admin
+- Cadastro:        https://barberplan.vercel.app/admin/cadastro
+
+============================================
+PRÓXIMOS PASSOS (OPCIONAIS)
+============================================
+
+1. Autenticação - Adicionar login para proteger o painel admin
+2. WhatsApp - Integrar lembretes automáticos
+3. Domínio personalizado - Configurar domínio próprio
+4. Stripe - Integrar pagamentos online

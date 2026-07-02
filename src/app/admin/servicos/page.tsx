@@ -1,28 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
-
-const initialServices = [
-  { id: "1", name: "Corte + Sobrancelha", price: 65, duration: 60, category: "combos", active: true },
-  { id: "2", name: "Corte + Barba Express", price: 80, duration: 75, category: "combos", active: true },
-  { id: "3", name: "Corte + Barboterapia", price: 90, duration: 90, category: "combos", active: true },
-  { id: "4", name: "Corte + Limpeza de Pele", price: 90, duration: 90, category: "combos", active: true },
-  { id: "5", name: "Corte + Barba + Sobrancelha", price: 95, duration: 90, category: "combos", active: true },
-  { id: "6", name: "Depilação Nasal", price: 15, duration: 15, category: "depilacao", active: true },
-  { id: "7", name: "Depilação de Orelha", price: 15, duration: 15, category: "depilacao", active: true },
-  { id: "8", name: "Limpeza de Pele Individual", price: 50, duration: 30, category: "pele", active: true },
-  { id: "9", name: "Selagem", price: 60, duration: 45, category: "cabelo", active: true },
-  { id: "10", name: "Luzes + Corte", price: 190, duration: 180, category: "cabelo", active: true },
-  { id: "11", name: "Platinado + Corte", price: 200, duration: 180, category: "cabelo", active: true },
-  { id: "12", name: "Hidratação", price: 100, duration: 90, category: "cabelo", active: true },
-];
+import { Plus, Pencil, Power, X, Trash2 } from "lucide-react";
+import { BarberPole, Mustache, ScissorsIcon } from "@/components/barber-icons";
+import { useSaasUser } from "@/contexts/saas-user";
 
 const categories = [
   { value: "corte", label: "Corte" },
@@ -35,23 +21,57 @@ const categories = [
 ];
 
 export default function AdminServices() {
-  const [services, setServices] = useState(initialServices);
+  const { tenant } = useSaasUser();
+  const [services, setServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editService, setEditService] = useState<any>(null);
   const [form, setForm] = useState({ name: "", price: "", duration: "", category: "corte" });
+  const tenantSlug = tenant?.slug;
 
-  function saveService(e: React.FormEvent) {
+  async function loadServices() {
+    if (!tenantSlug) return;
+    setLoading(true);
+    const res = await fetch(`/api/services?tenant=${tenantSlug}`);
+    const data = await res.json();
+    setServices(data.services || []);
+    setLoading(false);
+  }
+
+  useEffect(() => { if (tenantSlug) loadServices(); }, [tenantSlug]);
+
+  async function saveService(e: React.FormEvent) {
     e.preventDefault();
+
     if (editService) {
-      setServices(services.map((s) =>
-        s.id === editService.id ? { ...s, ...form, price: Number(form.price), duration: Number(form.duration) } : s
-      ));
+      await fetch(`/api/services/${editService.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          price: Number(form.price),
+          duration: Number(form.duration),
+          category: form.category,
+        }),
+      });
     } else {
-      setServices([...services, { id: String(Date.now()), ...form, price: Number(form.price), duration: Number(form.duration), active: true }]);
+      await fetch("/api/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tenantSlug: tenantSlug,
+          name: form.name,
+          price: Number(form.price),
+          duration: Number(form.duration),
+          category: form.category,
+        }),
+      });
     }
+
     setShowForm(false);
     setEditService(null);
     setForm({ name: "", price: "", duration: "", category: "corte" });
+    loadServices();
   }
 
   function edit(svc: any) {
@@ -60,116 +80,148 @@ export default function AdminServices() {
     setShowForm(true);
   }
 
-  function toggleActive(id: string) {
-    setServices(services.map((s) => s.id === id ? { ...s, active: !s.active } : s));
+  async function removeService(id: string, name: string) {
+    if (!confirm(`Remover "${name}"? Esta ação não pode ser desfeita.`)) return;
+    await fetch(`/api/services/${id}`, { method: "DELETE" });
+    loadServices();
+  }
+
+  async function toggleActive(id: string, active: boolean) {
+    await fetch(`/api/services/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: !active }),
+    });
+    loadServices();
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <AdminHeader />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+    <div className="p-6 relative">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-[0.015]">
+        <BarberPole className="absolute top-40 -right-10 w-32 h-80 text-zinc-900" />
+        <Mustache className="absolute bottom-20 left-12 w-20 text-zinc-900" />
+      </div>
+
+      <div className="flex items-center justify-between mb-8">
+        <div>
           <h1 className="text-2xl font-bold text-zinc-900">Serviços</h1>
-          <Button onClick={() => { setShowForm(true); setEditService(null); setForm({ name: "", price: "", duration: "", category: "corte" }); }}>
-            + Novo Serviço
-          </Button>
+          <p className="text-sm text-zinc-500 mt-1">{services.length} serviços cadastrados</p>
         </div>
+        <Button onClick={() => { setShowForm(true); setEditService(null); setForm({ name: "", price: "", duration: "", category: "corte" }); }}>
+          <Plus className="size-4 mr-1.5" />
+          Novo Serviço
+        </Button>
+      </div>
 
-        {showForm && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>{editService ? "Editar Serviço" : "Novo Serviço"}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={saveService} className="space-y-4">
-                <div>
-                  <Label>Nome do Serviço</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label>Preço (R$)</Label>
-                    <Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
-                  </div>
-                  <div>
-                    <Label>Duração (min)</Label>
-                    <Input type="number" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} required />
-                  </div>
-                  <div>
-                    <Label>Categoria</Label>
-                    <Select options={categories} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button type="submit">{editService ? "Salvar" : "Criar"}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
+      {showForm && (
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-sm mb-8 overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+            <h2 className="text-sm font-semibold text-zinc-900">
+              {editService ? "Editar Serviço" : "Novo Serviço"}
+            </h2>
+            <button onClick={() => setShowForm(false)} className="text-zinc-400 hover:text-zinc-600">
+              <X className="size-4" />
+            </button>
+          </div>
+          <form onSubmit={saveService} className="p-6 space-y-4">
+            <div>
+              <Label>Nome do Serviço</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>Preço (R$)</Label>
+                <Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+              </div>
+              <div>
+                <Label>Duração (min)</Label>
+                <Input type="number" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} required />
+              </div>
+              <div>
+                <Label>Categoria</Label>
+                <Select options={categories} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+              </div>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button type="submit">{editService ? "Salvar" : "Criar"}</Button>
+              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
+            </div>
+          </form>
+        </div>
+      )}
 
-        <Card>
-          <CardContent className="p-0">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-zinc-200">
-                  <th className="text-left p-4 text-sm font-medium text-zinc-500">Serviço</th>
-                  <th className="text-left p-4 text-sm font-medium text-zinc-500">Categoria</th>
-                  <th className="text-left p-4 text-sm font-medium text-zinc-500">Duração</th>
-                  <th className="text-right p-4 text-sm font-medium text-zinc-500">Preço</th>
-                  <th className="text-center p-4 text-sm font-medium text-zinc-500">Ativo</th>
-                  <th className="text-right p-4 text-sm font-medium text-zinc-500">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {services.map((svc) => (
-                  <tr key={svc.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                    <td className="p-4 text-sm font-medium text-zinc-900">{svc.name}</td>
-                    <td className="p-4 text-sm text-zinc-500">{categories.find(c => c.value === svc.category)?.label}</td>
-                    <td className="p-4 text-sm text-zinc-500">{svc.duration} min</td>
-                    <td className="p-4 text-sm text-right font-medium">{formatCurrency(svc.price)}</td>
-                    <td className="p-4 text-center">
-                      <button
-                        onClick={() => toggleActive(svc.id)}
-                        className={`w-3 h-3 rounded-full inline-block ${svc.active ? "bg-green-500" : "bg-zinc-300"}`}
-                      />
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-zinc-100 bg-zinc-50">
+                <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Serviço</th>
+                <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Categoria</th>
+                <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Duração</th>
+                <th className="text-right px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Preço</th>
+                <th className="text-center px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Ativo</th>
+                <th className="text-right px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={6} className="text-center py-12 text-zinc-400 text-sm">Carregando...</td></tr>
+              ) : services.length === 0 ? (
+                <tr><td colSpan={6} className="text-center py-12 text-zinc-400 text-sm">Nenhum serviço encontrado</td></tr>
+              ) : (
+                services.map((svc) => (
+                  <tr key={svc.id} className="border-b border-zinc-50 hover:bg-zinc-50 transition-colors">
+                    <td className="px-5 py-4">
+                      <span className="text-sm font-medium text-zinc-900">{svc.name}</span>
                     </td>
-                    <td className="p-4 text-right">
-                      <Button size="sm" variant="ghost" onClick={() => edit(svc)}>Editar</Button>
+                    <td className="px-5 py-4">
+                      <span className="text-xs text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
+                        {categories.find(c => c.value === svc.category)?.label || svc.category}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-zinc-500">{svc.duration} min</td>
+                    <td className="px-5 py-4 text-sm text-right font-semibold text-zinc-900">{formatCurrency(svc.price)}</td>
+                    <td className="px-5 py-4 text-center">
+                      <button
+                        onClick={() => toggleActive(svc.id, svc.active)}
+                        className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-colors ${
+                          svc.active
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : "bg-zinc-100 text-zinc-400 border-zinc-200"
+                        }`}
+                      >
+                        <Power className="size-3" />
+                        {svc.active ? "Ativo" : "Inativo"}
+                      </button>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => edit(svc)}>
+                          <Pencil className="size-3.5 mr-1" />
+                          Editar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeService(svc.id, svc.name)}
+                          className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                        >
+                          <Trash2 className="size-3.5 mr-1" />
+                          Remover
+                        </Button>
+                      </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="mt-10 flex justify-center opacity-[0.03]">
+        <ScissorsIcon className="w-16 h-auto text-zinc-900" />
       </div>
     </div>
-  );
-}
-
-function AdminHeader() {
-  return (
-    <header className="bg-white border-b border-zinc-200">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/admin">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-sm font-bold text-white">
-              B
-            </div>
-          </Link>
-          <span className="text-lg font-bold text-zinc-900">BarberPlan</span>
-        </div>
-        <nav className="flex gap-6 text-sm">
-          <Link href="/admin" className="text-zinc-500 hover:text-zinc-900">Dashboard</Link>
-          <Link href="/admin/agendamentos" className="text-zinc-500 hover:text-zinc-900">Agendamentos</Link>
-          <Link href="/admin/servicos" className="text-zinc-900 font-medium">Serviços</Link>
-          <Link href="/admin/barbeiros" className="text-zinc-500 hover:text-zinc-900">Barbeiros</Link>
-          <Link href="/admin/financeiro" className="text-zinc-500 hover:text-zinc-900">Financeiro</Link>
-          <Link href="/admin/configuracoes" className="text-zinc-500 hover:text-zinc-900">Configurações</Link>
-        </nav>
-      </div>
-    </header>
   );
 }

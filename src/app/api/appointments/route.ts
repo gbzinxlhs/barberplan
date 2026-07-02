@@ -12,6 +12,7 @@ export async function POST(request: Request) {
       customerPhone,
       startTime,
       endTime,
+      paymentMethod,
     } = body;
 
     const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         status: "confirmed",
+        paymentMethod: paymentMethod || null,
         tenantId: tenant.id,
         barberId,
         serviceId,
@@ -61,6 +63,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const tenantSlug = searchParams.get("tenant");
   const date = searchParams.get("date");
+  const barberId = searchParams.get("barberId");
 
   if (!tenantSlug) {
     return NextResponse.json({ error: "Tenant slug required" }, { status: 400 });
@@ -78,6 +81,9 @@ export async function GET(request: Request) {
     const end = new Date(date);
     end.setHours(23, 59, 59, 999);
     where.startTime = { gte: start, lte: end };
+  }
+  if (barberId) {
+    where.barberId = barberId;
   }
 
   const appointments = await prisma.appointment.findMany({
