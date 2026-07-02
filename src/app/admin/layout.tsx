@@ -13,6 +13,7 @@ import {
   ChevronRight,
   LogOut,
   Loader2,
+  Store,
 } from "lucide-react";
 import { useSaasUser } from "@/contexts/saas-user";
 import { SaasUserProvider } from "@/contexts/saas-user";
@@ -22,6 +23,7 @@ const navItems = [
   { href: "/admin/agendamentos", label: "Agendamentos", icon: Calendar },
   { href: "/admin/servicos", label: "Serviços", icon: Scissors },
   { href: "/admin/barbeiros", label: "Barbeiros", icon: Users },
+  { href: "/admin/clientes", label: "Clientes", icon: Store },
   { href: "/admin/financeiro", label: "Financeiro", icon: DollarSign },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
