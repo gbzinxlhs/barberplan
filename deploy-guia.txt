@@ -73,24 +73,65 @@ Após o deploy, no terminal do seu computador, execute:
 Isso vai criar todas as tabelas no banco de dados do Supabase.
 
 ============================================
+PASSO 5: CONFIGURAR ASAAS (PAGAMENTOS)
+============================================
+
+1. Acesse https://sandbox.asaas.com e crie uma conta
+2. Vá em: Configurações → Integração → Chave de API
+3. Clique em "Gerar nova chave" e copie o access_token
+
+4. No terminal (na pasta barberplan), adicione as variáveis na Vercel:
+
+   vercel env add ASAAS_API_KEY production
+   # cole o token gerado no Asaas
+
+   vercel env add ASAAS_ENVIRONMENT production
+   # digite: sandbox (enquanto testa) ou production (quando for para o ar)
+
+5. Faça um novo deploy para aplicar as variáveis:
+
+   vercel --prod
+
+6. No painel do Asaas, vá em Configurações → Webhooks e adicione:
+   - URL: https://barberplan-nine.vercel.app/api/asaas/webhook
+   - Eventos: PAYMENT_RECEIVED, PAYMENT_CONFIRMED
+   - Clique em "Salvar"
+
+============================================
+PASSO 6: CONFIGURAR CRON-JOB (KEEP ALIVE)
+============================================
+
+O Supabase Free pausa o banco se ficar 7 dias inativo.
+Para evitar isso, configure um ping a cada 10 minutos:
+
+1. Acesse https://cron-job.org e crie uma conta
+2. Clique em "Create Cronjob"
+3. Preencha:
+   - URL: https://barberplan-nine.vercel.app/api/ping
+   - Intervalo: Every 10 minutes
+   - Método: GET
+4. Clique em "Create"
+
+============================================
 ACESSANDO O SISTEMA
 ============================================
 
 Após o deploy, sua URL será:
-https://barberplan.vercel.app
+https://barberplan-nine.vercel.app
 
 Páginas disponíveis:
-- Landing page:    https://barberplan.vercel.app
-- Página Brooklyn: https://barberplan.vercel.app/brooklyn
-- Agendamento:     https://barberplan.vercel.app/brooklyn/agendar
-- Painel Admin:    https://barberplan.vercel.app/admin
-- Cadastro:        https://barberplan.vercel.app/admin/cadastro
+- Landing page:     https://barberplan-nine.vercel.app
+- Página vitrine:   https://barberplan-nine.vercel.app/[slug]
+- Agendamento:      https://barberplan-nine.vercel.app/[slug]/agendar
+- Painel Admin:     https://barberplan-nine.vercel.app/admin
+- Checkout:         https://barberplan-nine.vercel.app/checkout?plan=starter&billing=trial
+- Setup pós-compra: https://barberplan-nine.vercel.app/admin/setup?slug=[slug]
 
 ============================================
 PRÓXIMOS PASSOS (OPCIONAIS)
 ============================================
 
-1. Autenticação - Adicionar login para proteger o painel admin
+1. Autenticação - Adicionar login para proteger o painel admin (já implementado via SaasUser)
 2. WhatsApp - Integrar lembretes automáticos
-3. Domínio personalizado - Configurar domínio próprio
-4. Stripe - Integrar pagamentos online
+3. Domínio personalizado - Comprar domínio (.app, .com.br) e configurar na Vercel
+4. Modo produção Asaas - Trocar ASAAS_ENVIRONMENT para "production" e chave real
