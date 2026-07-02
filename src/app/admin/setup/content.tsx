@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CheckCircle, Scissors, Clock, Globe, Loader2, Check, X } from "lucide-react";
+
+function normalizeSlug(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .replace(/-+/g, "-");
+}
 
 export default function SetupContent() {
   const searchParams = useSearchParams();
@@ -20,9 +29,10 @@ export default function SetupContent() {
   const [checkingSlug, setCheckingSlug] = useState(false);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
+  const slugManuallyEdited = useRef(false);
 
   useEffect(() => {
-    if (!slug) { router.push("/admin"); return; }
+    if (!slug) { router.push("/"); return; }
     const stored = localStorage.getItem("saas_tenant");
     if (stored) {
       try {
@@ -33,6 +43,12 @@ export default function SetupContent() {
       } catch {}
     }
   }, [slug, router]);
+
+  useEffect(() => {
+    if (!slugManuallyEdited.current && storeName.trim().length >= 3) {
+      setStoreSlug(normalizeSlug(storeName));
+    }
+  }, [storeName]);
 
   const checkSlug = useCallback(async (value: string) => {
     if (!value || value.length < 3) { setSlugAvailable(null); return; }
@@ -52,19 +68,20 @@ export default function SetupContent() {
     return () => clearTimeout(timer);
   }, [storeSlug, checkSlug]);
 
-  function normalizeSlug(value: string) {
-    return value
-      .toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
+  function handleSlugChange(value: string) {
+    slugManuallyEdited.current = true;
+    setStoreSlug(normalizeSlug(value));
+  }
+
+  function handleNameChange(value: string) {
+    setStoreName(value);
   }
 
   async function handleSave() {
     if (!slug) return;
     setSaving(true);
 
-    const finalSlug = normalizeSlug(storeSlug);
+    const finalSlug = normalizeSlug(storeSlug) || slug;
 
     await fetch(`/api/tenants/${slug}`, {
       method: "PATCH",
@@ -84,9 +101,8 @@ export default function SetupContent() {
   }
 
   if (done) {
-    const finalSlug = normalizeSlug(storeSlug);
+    const finalSlug = normalizeSlug(storeSlug) || slug || "";
     const siteUrl = `https://barberplan-nine.vercel.app/${finalSlug}`;
-    const adminUrl = `/admin`;
 
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -129,7 +145,7 @@ export default function SetupContent() {
             <label className="block text-xs font-medium text-zinc-500 mb-1">Nome da Barbearia</label>
             <input
               value={storeName}
-              onChange={(e) => setStoreName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               className="w-full border border-zinc-300 rounded-lg px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
               placeholder="Minha Barbearia"
             />
@@ -142,7 +158,7 @@ export default function SetupContent() {
               <span className="text-zinc-400">barberplan-nine.vercel.app/</span>
               <input
                 value={storeSlug}
-                onChange={(e) => setStoreSlug(normalizeSlug(e.target.value))}
+                onChange={(e) => handleSlugChange(e.target.value)}
                 className="flex-1 bg-transparent border-none outline-none text-zinc-900 p-0 focus:ring-0 min-w-[80px]"
                 placeholder="minha-barbearia"
               />
