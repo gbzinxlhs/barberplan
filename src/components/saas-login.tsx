@@ -2,21 +2,36 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, CheckCircle } from "lucide-react";
+import { X, CheckCircle, Mail, User, Phone, ArrowRight, Loader2 } from "lucide-react";
 import { useSaasUser } from "@/contexts/saas-user";
+
+type Tab = "entrar" | "cadastrar";
 
 export function SaasLogin() {
   const { user, setUser } = useSaasUser();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", surname: "", email: "", phone: "" });
+  const [tab, setTab] = useState<Tab>("entrar");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [signupForm, setSignupForm] = useState({ name: "", surname: "", email: "", phone: "" });
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
+
+  function reset() {
+    setError("");
+    setDone(false);
+    setLoginEmail("");
+    setSignupForm({ name: "", surname: "", email: "", phone: "" });
+  }
+
+  function openModal() {
+    reset();
+    setTab("entrar");
+    setOpen(true);
+  }
 
   const planLabel: Record<string, string> = {
     starter_trial: "Starter (Trial)",
@@ -24,7 +39,30 @@ export function SaasLogin() {
     pro: "Pro",
   };
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/saas-users?email=${encodeURIComponent(loginEmail)}`);
+      const data = await res.json();
+      if (data.user) {
+        setUser(data.user);
+        setDone(true);
+        setTimeout(() => { setOpen(false); setDone(false); }, 1500);
+      } else {
+        setError("Conta não encontrada. Cadastre-se abaixo.");
+        setSignupForm({ ...signupForm, email: loginEmail });
+        setTab("cadastrar");
+      }
+    } catch {
+      setError("Erro ao conectar. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setSaving(true);
@@ -32,7 +70,7 @@ export function SaasLogin() {
       const res = await fetch("/api/saas-users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(signupForm),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); return; }
@@ -60,7 +98,7 @@ export function SaasLogin() {
             {user.name[0]}
           </span>
           <button
-            onClick={() => { localStorage.removeItem("saas_user"); setUser(null); }}
+            onClick={() => { localStorage.removeItem("saas_user"); localStorage.removeItem("saas_tenant"); setUser(null); }}
             className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors uppercase tracking-wider"
           >
             Sair
@@ -68,7 +106,7 @@ export function SaasLogin() {
         </div>
       ) : (
         <button
-          onClick={() => setOpen(true)}
+          onClick={openModal}
           className="text-sm text-zinc-400 hover:text-white transition-colors"
         >
           Entrar
@@ -78,10 +116,7 @@ export function SaasLogin() {
       {open && mounted && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60" onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
           <div className="bg-zinc-900 rounded-2xl border border-zinc-800 shadow-2xl w-full max-w-md mx-4 relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors z-10"
-            >
+            <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors z-10">
               <X className="size-4" />
             </button>
 
@@ -92,71 +127,144 @@ export function SaasLogin() {
               </div>
             ) : (
               <div className="p-8">
-                <h2 className="text-xl font-bold text-white">Criar conta ou entrar</h2>
-                <p className="text-sm text-zinc-500 mt-1">
-                  Crie sua conta para contratar um plano. Já tem conta? Informe o mesmo email.
-                </p>
-
-                <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1">Nome</label>
-                      <input
-                        value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        required
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
-                        placeholder="João"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-400 mb-1">Sobrenome</label>
-                      <input
-                        value={form.surname}
-                        onChange={(e) => setForm({ ...form, surname: e.target.value })}
-                        required
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
-                        placeholder="Silva"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1">E-mail</label>
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      required
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
-                      placeholder="joao@email.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-zinc-400 mb-1">WhatsApp / Telefone</label>
-                    <input
-                      type="tel"
-                      value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      required
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
-                      placeholder="(85) 99999-9999"
-                    />
-                  </div>
-
-                  {error && (
-                    <p className="text-xs text-red-400">{error}</p>
-                  )}
-
+                {/* tabs */}
+                <div className="flex bg-zinc-800 rounded-xl p-1 mb-6">
                   <button
-                    type="submit"
-                    disabled={saving}
-                    className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
+                    onClick={() => { setTab("entrar"); setError(""); }}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                      tab === "entrar" ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                    }`}
                   >
-                    {saving ? "Conectando..." : "Criar conta / Entrar"}
+                    Entrar
                   </button>
-                </form>
+                  <button
+                    onClick={() => { setTab("cadastrar"); setError(""); }}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                      tab === "cadastrar" ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                  >
+                    Cadastrar
+                  </button>
+                </div>
+
+                {tab === "entrar" ? (
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <h2 className="text-xl font-bold text-white">Entrar</h2>
+                    <p className="text-sm text-zinc-500">Informe seu email para acessar sua conta.</p>
+
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-400 mb-1">E-mail</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+                        <input
+                          type="email"
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                          required
+                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg pl-10 pr-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
+                          placeholder="joao@email.com"
+                        />
+                      </div>
+                    </div>
+
+                    {error && <p className="text-xs text-red-400">{error}</p>}
+
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 text-sm flex items-center justify-center gap-2"
+                    >
+                      {saving ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
+                      {saving ? "Entrando..." : "Entrar"}
+                    </button>
+
+                    <p className="text-xs text-zinc-600 text-center">
+                      Não tem conta?{" "}
+                      <button type="button" onClick={() => { setTab("cadastrar"); setError(""); }} className="text-primary hover:underline">
+                        Cadastre-se
+                      </button>
+                    </p>
+                  </form>
+                ) : (
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <h2 className="text-xl font-bold text-white">Criar conta</h2>
+                    <p className="text-sm text-zinc-500">Preencha seus dados para criar uma conta.</p>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-400 mb-1">Nome</label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+                          <input
+                            value={signupForm.name}
+                            onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })}
+                            required
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg pl-10 pr-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
+                            placeholder="João"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-400 mb-1">Sobrenome</label>
+                        <input
+                          value={signupForm.surname}
+                          onChange={(e) => setSignupForm({ ...signupForm, surname: e.target.value })}
+                          required
+                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
+                          placeholder="Silva"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-400 mb-1">E-mail</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+                        <input
+                          type="email"
+                          value={signupForm.email}
+                          onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
+                          required
+                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg pl-10 pr-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
+                          placeholder="joao@email.com"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-400 mb-1">WhatsApp / Telefone</label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+                        <input
+                          type="tel"
+                          value={signupForm.phone}
+                          onChange={(e) => setSignupForm({ ...signupForm, phone: e.target.value })}
+                          required
+                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg pl-10 pr-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
+                          placeholder="(85) 99999-9999"
+                        />
+                      </div>
+                    </div>
+
+                    {error && <p className="text-xs text-red-400">{error}</p>}
+
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 text-sm flex items-center justify-center gap-2"
+                    >
+                      {saving ? <Loader2 className="size-4 animate-spin" /> : null}
+                      {saving ? "Criando conta..." : "Criar conta"}
+                    </button>
+
+                    <p className="text-xs text-zinc-600 text-center">
+                      Já tem conta?{" "}
+                      <button type="button" onClick={() => { setTab("entrar"); setError(""); }} className="text-primary hover:underline">
+                        Entrar
+                      </button>
+                    </p>
+                  </form>
+                )}
               </div>
             )}
           </div>
