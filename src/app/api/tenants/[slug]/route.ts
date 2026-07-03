@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth-saas";
 
 export async function GET(
   request: Request,
@@ -33,8 +34,22 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const auth = await getAuthUser();
+  if (!auth) {
+    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  }
+
   const { slug } = await params;
+  const tenant = await prisma.tenant.findUnique({ where: { slug } });
+  if (!tenant) {
+    return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
+  }
+
+  if (auth.user.tenantId !== tenant.id) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
   const body = await request.json();
-  const tenant = await prisma.tenant.update({ where: { slug }, data: body });
-  return NextResponse.json({ tenant });
+  const updated = await prisma.tenant.update({ where: { slug }, data: body });
+  return NextResponse.json({ tenant: updated });
 }

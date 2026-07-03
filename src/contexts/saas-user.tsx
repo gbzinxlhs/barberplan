@@ -21,6 +21,7 @@ interface SaasUser {
   plan: string;
   planExpiresAt: string | null;
   tenantId: string | null;
+  role?: string;
 }
 
 interface SaasUserContextType {
@@ -28,7 +29,7 @@ interface SaasUserContextType {
   tenant: Tenant | null;
   setUser: (user: SaasUser | null) => void;
   setTenant: (tenant: Tenant | null) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -37,58 +38,49 @@ const SaasUserContext = createContext<SaasUserContextType>({
   tenant: null,
   setUser: () => {},
   setTenant: () => {},
-  logout: () => {},
+  logout: async () => {},
   refreshUser: async () => {},
 });
 
 export function SaasUserProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<SaasUser | null>(null);
   const [tenant, setTenantState] = useState<Tenant | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("saas_user");
-    if (storedUser) {
-      try { setUserState(JSON.parse(storedUser)); } catch {}
-    }
-    const storedTenant = localStorage.getItem("saas_tenant");
-    if (storedTenant) {
-      try { setTenantState(JSON.parse(storedTenant)); } catch {}
-    }
+    fetch("/api/auth/saas/me")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.user) {
+          setUserState(data.user);
+          if (data.tenant) setTenantState(data.tenant);
+        }
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
   }, []);
 
   function setUser(user: SaasUser | null) {
     setUserState(user);
-    if (user) {
-      localStorage.setItem("saas_user", JSON.stringify(user));
-    } else {
-      localStorage.removeItem("saas_user");
-    }
   }
 
   function setTenant(tenant: Tenant | null) {
     setTenantState(tenant);
-    if (tenant) {
-      localStorage.setItem("saas_tenant", JSON.stringify(tenant));
-    } else {
-      localStorage.removeItem("saas_tenant");
-    }
   }
 
-  function logout() {
-    setUser(null);
-    setTenant(null);
+  async function logout() {
+    await fetch("/api/auth/saas/logout", { method: "POST" });
+    setUserState(null);
+    setTenantState(null);
   }
 
   async function refreshUser() {
-    const stored = localStorage.getItem("saas_user");
-    if (!stored) return;
     try {
-      const { email } = JSON.parse(stored);
-      const res = await fetch(`/api/saas-users/me?email=${encodeURIComponent(email)}`);
+      const res = await fetch("/api/auth/saas/me");
       const data = await res.json();
       if (data.user) {
-        setUser(data.user);
-        if (data.tenant) setTenant(data.tenant);
+        setUserState(data.user);
+        if (data.tenant) setTenantState(data.tenant);
       }
     } catch {}
   }

@@ -33,7 +33,7 @@ export default function TenantAdminLayout({ children }: { children: React.ReactN
   const pathname = usePathname();
   const router = useRouter();
   const tenantSlug = params.tenant as string;
-  const { user } = useSaasUser();
+  const { user, logout } = useSaasUser();
 
   const [tenant, setTenant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -130,9 +130,8 @@ export default function TenantAdminLayout({ children }: { children: React.ReactN
             Ver site público
           </a>
           <button
-            onClick={() => {
-              localStorage.removeItem("saas_user");
-              localStorage.removeItem("saas_tenant");
+            onClick={async () => {
+              await logout();
               router.push("/");
             }}
             className="flex items-center gap-2 px-3 py-2 w-full rounded-lg text-xs text-zinc-500 hover:text-red-400 hover:bg-zinc-800/50 transition-all"

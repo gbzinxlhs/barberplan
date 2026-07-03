@@ -8,7 +8,7 @@ import { useSaasUser } from "@/contexts/saas-user";
 type Tab = "entrar" | "cadastrar";
 
 export function SaasLogin() {
-  const { user, setUser } = useSaasUser();
+  const { user, setUser, logout } = useSaasUser();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("entrar");
   const [saving, setSaving] = useState(false);
@@ -44,7 +44,11 @@ export function SaasLogin() {
     setError("");
     setSaving(true);
     try {
-      const res = await fetch(`/api/saas-users?email=${encodeURIComponent(loginEmail)}`);
+      const res = await fetch(`/api/auth/saas/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: loginEmail }),
+      });
       const data = await res.json();
       if (data.user) {
         setUser(data.user);
@@ -67,7 +71,7 @@ export function SaasLogin() {
     setError("");
     setSaving(true);
     try {
-      const res = await fetch("/api/saas-users", {
+      const res = await fetch("/api/auth/saas/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(signupForm),
@@ -98,7 +102,7 @@ export function SaasLogin() {
             {user.name[0]}
           </span>
           <button
-            onClick={() => { localStorage.removeItem("saas_user"); localStorage.removeItem("saas_tenant"); setUser(null); }}
+            onClick={() => logout()}
             className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors uppercase tracking-wider"
           >
             Sair

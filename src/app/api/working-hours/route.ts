@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth-saas";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -18,11 +19,20 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const auth = await getAuthUser();
+  if (!auth) {
+    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  }
+
   const body = await request.json();
   const { tenantId, hours } = body;
 
   if (!tenantId || !Array.isArray(hours)) {
     return NextResponse.json({ error: "tenantId e hours são obrigatórios" }, { status: 400 });
+  }
+
+  if (auth.user.tenantId !== tenantId) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
   await prisma.workingHour.deleteMany({ where: { tenantId } });
