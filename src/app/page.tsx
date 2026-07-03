@@ -153,6 +153,25 @@ function HomeContent() {
   const planosRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
 
+  function animateSection(trigger: HTMLElement, targets: NodeListOf<HTMLElement>, staggerVal: number = 0.08) {
+    if (targets.length === 0) return;
+    gsap.set(targets, { y: 50, opacity: 0, scale: 0.97 });
+    gsap.to(targets, {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      duration: 0.7,
+      stagger: staggerVal,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger,
+        start: "top 82%",
+        toggleActions: "play none none none",
+        invalidateOnRefresh: true,
+      },
+    });
+  }
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       if (heroRef.current) {
@@ -162,9 +181,9 @@ function HomeContent() {
           y: 0,
           opacity: 1,
           duration: 0.7,
-          stagger: 0.15,
+          stagger: 0.12,
           ease: "power3.out",
-          delay: 0.2,
+          delay: 0.3,
         });
 
         const parallax = heroRef.current.querySelector<HTMLElement>(".gsap-parallax");
@@ -182,34 +201,41 @@ function HomeContent() {
         }
       }
 
-      const sections = [
-        destaquesRef.current,
-        entregaveisRef.current,
-        processoRef.current,
-        publicoRef.current,
-        planosRef.current,
-        ctaRef.current,
-      ];
+      if (destaquesRef.current) {
+        animateSection(destaquesRef.current, destaquesRef.current.querySelectorAll(".gsap-card"), 0.12);
+      }
+      if (entregaveisRef.current) {
+        animateSection(entregaveisRef.current, entregaveisRef.current.querySelectorAll(".gsap-card"), 0.06);
+      }
+      if (processoRef.current) {
+        animateSection(processoRef.current, processoRef.current.querySelectorAll(".gsap-card"), 0.1);
+      }
+      if (publicoRef.current) {
+        animateSection(publicoRef.current, publicoRef.current.querySelectorAll(".gsap-card"), 0.12);
+      }
+      if (planosRef.current) {
+        animateSection(planosRef.current, planosRef.current.querySelectorAll(".gsap-card"), 0.15);
+      }
+      if (ctaRef.current) {
+        animateSection(ctaRef.current, ctaRef.current.querySelectorAll(".gsap-card"), 0.1);
+      }
 
-      sections.forEach((section) => {
-        if (!section) return;
-        const cards = section.querySelectorAll<HTMLElement>(".gsap-card");
-        if (cards.length === 0) return;
-        gsap.set(cards, { y: 40, opacity: 0 });
-        gsap.to(cards, {
+      const faqItems = document.querySelectorAll(".gsap-faq");
+      if (faqItems.length > 0) {
+        gsap.set(faqItems, { y: 30, opacity: 0 });
+        gsap.to(faqItems, {
           y: 0,
           opacity: 1,
-          duration: 0.6,
-          stagger: 0.1,
+          duration: 0.5,
+          stagger: 0.06,
           ease: "power2.out",
           scrollTrigger: {
-            trigger: section,
-            start: "top 85%",
+            trigger: faqItems[0].parentElement,
+            start: "top 82%",
             toggleActions: "play none none none",
-            invalidateOnRefresh: true,
           },
         });
-      });
+      }
 
       ScrollTrigger.refresh();
     });
@@ -654,7 +680,7 @@ function HomeContent() {
             </div>
             <div className="max-w-2xl mx-auto space-y-3">
               {faqItems.map((item, idx) => (
-                <div key={idx} className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+                <div key={idx} className="gsap-faq rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
                   <button
                     onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                     className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left"
