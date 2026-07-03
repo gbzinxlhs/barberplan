@@ -3,7 +3,15 @@
 ## Estado Atual (última atualização: Jul 2026)
 
 ### Done
-- JWT httpOnly cookie auth (saas_token) — login/signup/logout com API routes, server-verified
+- **Cron job `/api/cron/appointments`** — auto-completa, auto-cancela no-show (30min), auto-cancela pending (15min), envia lembretes WhatsApp 1h antes (protegido por CRON_SECRET)
+- **WhatsApp notifications** via Twilio (apenas plano Pro):
+  - Confirmação pro cliente + aviso na barbearia ao criar agendamento
+  - Notificação ao mudar status (confirmar/cancelar/finalizar)
+  - Lembrete 1h antes (via cron)
+  - Schema: `reminderSent` boolean no Appointment
+- **Paginação nos agendamentos admin** — 20 por página, navegação Anterior/[1][2][3]/Próximo, ordenado do mais recente
+- **Layout responsivo** — sidebars colapsam em mobile (hamburger + overlay), grids adaptativos, cards grouping nos agendamentos
+- **JWT httpOnly cookie auth** (saas_token) — login/signup/logout com API routes, server-verified
 - `requireOwner()` e `requireSuperAdmin()` guards para API routes
 - Proteção JWT em todas API routes de admin (barbers, services, appointments, working-hours, tenants)
 - Super Admin Panel com login JWT, listagem de tenants e delete com cascade transaction
@@ -22,6 +30,11 @@
 
 ### Blocked
 - `POST /api/tenants` não existe — `/admin/cadastro` quebrado
+- Twilio credentials não configuradas na Vercel — WhatsApp não dispara de fato
+
+### Observações
+- 10 barbearias no plano Starter rodam sem problemas no Supabase Free (limite 500MB, 2 conexões simultâneas)
+- Para produção real com muitas barbearias, recomendar Supabase Pro (US$25/mês) para conexões ilimitadas
 
 ---
 
@@ -243,6 +256,10 @@ Aplicadas via `className="animate-float"` etc. nos ícones decorativos da vitrin
 | `SUPER_ADMIN_EMAIL` | Email do super admin (ex: `admin@barberplan.com`) |
 | `SUPER_ADMIN_PASSWORD` | Senha do super admin (ex: `admin123`) |
 | `JWT_SECRET` | Chave secreta JWT (trocar em produção) |
+| `CRON_SECRET` | Chave secreta para `/api/cron/appointments` |
+| `TWILIO_ACCOUNT_SID` | Conta Twilio (WhatsApp) — vazio = apenas log |
+| `TWILIO_AUTH_TOKEN` | Token Twilio |
+| `TWILIO_WHATSAPP_NUMBER` | Número WhatsApp Twilio |
 
 
 ---
@@ -345,6 +362,50 @@ Aplicadas via `className="animate-float"` etc. nos ícones decorativos da vitrin
 - Buffer entre agendamentos (ex: 15 min de folga)
 - Página pública de confirmação/cancelamento para o cliente
 - Notificações via WhatsApp (lembrete de agendamento)
+
+---
+
+### Commit 8bd6fcc — "feat: pagination on admin appointments (20 per page)"
+- GET /api/appointments agora suporta `page` e `pageSize`, retorna `total`, `totalPages`
+- Admin agendamentos: 20 por página com navegação numerada
+- Ordenação alterada para `startTime: "desc"` (mais recente primeiro)
+
+### Commit 180d7a5 — "fix: responsive layout - collapsible sidebars, card grouping, grid fixes"
+- Sidebar do admin (tenant + super admin) colapsa em mobile:
+  - Botão hamburger no header, sidebar vira overlay com fundo escuro
+  - Fecha ao clicar fora (backdrop) ou no X
+  - `lg:ml-64` no main, `lg:translate-x-0` no aside
+- Grids responsivos:
+  - Serviços: `grid-cols-1 sm:grid-cols-3` (preço/duração/categoria)
+  - Configurações: `grid-cols-1 sm:grid-cols-2` (telefone/WhatsApp)
+  - Setup: `grid-cols-1 sm:grid-cols-2` (telefone/WhatsApp)
+  - Checkout: `grid-cols-1 sm:grid-cols-2` (nome/sobrenome)
+  - Landing page steps: `sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5`
+- Agendamentos admin: cada item vira card no mobile (borda, sombra, padding)
+- Horários: inputs `w-24 sm:w-28`, day row `flex-wrap`
+- Agendar: botões data `min-w-[56px] w-auto`, grade `grid-cols-3 sm:grid-cols-4 lg:grid-cols-5`
+
+### Commit 62c4b02 — "feat: WhatsApp notifications only for Pro plan tenants"
+- `sendWhatsAppIfPro()` — verifica se tenant tem SaasUser com `plan: "pro"` antes de enviar
+- POST /api/appointments, PATCH /api/appointments/[id], cron: usam `sendWhatsAppIfPro`
+- Planos free/starter: cron atualiza status mas não envia WhatsApp
+
+### Commit 7ffdde9 — "feat: WhatsApp notifications on create/status-change/reminder via Twilio"
+- `src/lib/whatsapp.ts` — envia via Twilio API REST (fetch), ou log quando não configurado
+- `formatPhone()` — formata número para padrão internacional
+- `formatDateTime()` — helper de data/hora
+- POST /api/appointments: confirmação pro cliente + aviso pra barbearia
+- PATCH /api/appointments/[id]: notifica cliente ao mudar status
+- Cron: lembrete 1h antes (busca appointments com `reminderSent: false`)
+- Schema: `Appointment.reminderSent` (Boolean, default false)
+
+### Commit 51b2a37 — "feat: cron job for auto-updating appointment status"
+- GET /api/cron/appointments (protegido por `Authorization: Bearer {CRON_SECRET}`)
+- Regras:
+  - `confirmed` + endTime passou → `completed`
+  - `confirmed` + 30min sem check-in → `cancelled` (no-show)
+  - `pending` + 15min passou → `cancelled`
+- Configurar cron-job.org a cada 1 minuto
 
 ---
 
