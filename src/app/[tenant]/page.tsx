@@ -70,6 +70,8 @@ function PhoneIcon({ className }: { className?: string }) {
   );
 }
 
+const HERO_DEFAULT_IMAGE = "https://unsplash.com/photos/41HCQN43PwU/download?force=true&w=600";
+
 export default async function TenantPage({
   params,
 }: {
@@ -223,15 +225,12 @@ export default async function TenantPage({
             </div>
 
             <div className="hidden lg:flex items-center justify-center">
-              <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900/50 flex items-center justify-center">
-                {tenant.logo ? (
-                  <img src={tenant.logo} alt={tenant.name} className="w-full h-full object-cover opacity-80" />
-                ) : (
-                  <div className="text-center p-12">
-                    <ScissorsIcon className="w-24 h-24 mx-auto opacity-20" style={{ color: pc }} />
-                    <p className="mt-4 text-sm text-zinc-600">{tenant.name}</p>
-                  </div>
-                )}
+              <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900/50">
+                <img
+                  src={tenant.logo || HERO_DEFAULT_IMAGE}
+                  alt={tenant.name}
+                  className="w-full h-full object-cover opacity-80"
+                />
               </div>
             </div>
           </div>
