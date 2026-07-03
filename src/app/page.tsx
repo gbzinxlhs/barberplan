@@ -365,7 +365,7 @@ function HomeContent() {
                 Processo cristalino, com marcos e aprovações a cada etapa.
               </p>
             </div>
-            <div className="grid md:grid-cols-5 gap-6">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {[
                 {
                   num: "01",

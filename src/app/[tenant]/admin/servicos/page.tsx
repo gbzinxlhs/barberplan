@@ -107,7 +107,7 @@ export default function TenantAdminServices() {
           </div>
           <form onSubmit={saveService} className="p-6 space-y-4">
             <div><Label>Nome do Serviço</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div><Label>Preço (R$)</Label><Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required /></div>
               <div><Label>Duração (min)</Label><Input type="number" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} required /></div>
               <div><Label>Categoria</Label><Select options={categories} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} /></div>

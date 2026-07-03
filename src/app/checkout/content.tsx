@@ -174,7 +174,7 @@ export default function CheckoutContent() {
           {!user ? (
             <div className="p-8">
               <form onSubmit={handleLogin} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-zinc-400 mb-1">Nome</label>
                     <input

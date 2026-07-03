@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -9,6 +9,8 @@ import {
   LogOut,
   ChevronRight,
   Shield,
+  Menu,
+  X,
 } from "lucide-react";
 import { BarberPole, Mustache, ScissorsIcon } from "@/components/barber-icons";
 import { SuperAdminProvider, useSuperAdmin } from "@/contexts/super-admin";
@@ -30,6 +32,7 @@ function SuperAdminLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, loading, logout } = useSuperAdmin();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user && pathname !== "/super-admin/login") {
@@ -55,8 +58,16 @@ function SuperAdminLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex">
-      <aside className="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col fixed h-full">
-        <div className="p-5 border-b border-zinc-800">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col transform transition-transform duration-200 ease-in-out ${
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      } lg:relative lg:translate-x-0`}>
+        <div className="p-5 border-b border-zinc-800 flex items-center justify-between">
           <Link href="/super-admin" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground relative overflow-hidden">
               B
@@ -67,6 +78,12 @@ function SuperAdminLayoutInner({ children }: { children: React.ReactNode }) {
               <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Super Admin</p>
             </div>
           </Link>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+          >
+            <X className="size-5" />
+          </button>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
@@ -114,13 +131,19 @@ function SuperAdminLayoutInner({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 ml-64">
-        <header className="bg-zinc-900 border-b border-zinc-800 h-16 flex items-center px-6">
-          <div className="flex items-center gap-3 text-sm text-zinc-500">
-            <Shield className="size-4 text-primary" />
-            <span className="text-zinc-200 font-medium">Super Admin</span>
-            <span className="text-zinc-600">/</span>
-            <span className="text-zinc-400">
+      <main className="flex-1 lg:ml-64 min-w-0">
+        <header className="bg-zinc-900 border-b border-zinc-800 h-16 flex items-center px-4 sm:px-6">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden mr-3 p-2 -ml-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          >
+            <Menu className="size-5" />
+          </button>
+          <div className="flex items-center gap-2 sm:gap-3 text-sm text-zinc-500 min-w-0">
+            <Shield className="size-4 text-primary shrink-0" />
+            <span className="text-zinc-200 font-medium truncate">Super Admin</span>
+            <span className="text-zinc-600 shrink-0">/</span>
+            <span className="text-zinc-400 truncate">
               {navItems.find((i) => i.href === pathname)?.label || "Dashboard"}
             </span>
           </div>

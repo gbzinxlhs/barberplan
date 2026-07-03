@@ -426,7 +426,7 @@ export default function BookingPage() {
                   const isSelected = selectedDate && format(selectedDate, "yyyy-MM-dd") === format(date, "yyyy-MM-dd");
                   return (
                     <button key={i} type="button" disabled={isClosed} onClick={() => setSelectedDate(date)}
-                      className={`flex-shrink-0 w-[72px] py-3 rounded-xl text-center transition-all ${isSelected ? "text-white" : isClosed ? "bg-zinc-900/50 text-zinc-700 cursor-not-allowed" : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"}`}
+                      className={`flex-shrink-0 min-w-[56px] w-auto px-1.5 sm:w-[72px] sm:px-3 py-3 rounded-xl text-center transition-all ${isSelected ? "text-white" : isClosed ? "bg-zinc-900/50 text-zinc-700 cursor-not-allowed" : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"}`}
                       style={isSelected ? { backgroundColor: pc } : {}}>
                       <div className="text-[10px] uppercase tracking-wider">{format(date, "EEE", { locale: ptBR }).slice(0, 3)}</div>
                       <div className="text-base font-bold">{format(date, "dd")}</div>
@@ -442,7 +442,7 @@ export default function BookingPage() {
                     <p className="text-zinc-600 text-xs mt-1">Selecione outro dia</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
                     {availableTimes.map((time) => {
                       const isBooked = bookedTimes.includes(time);
                       return (

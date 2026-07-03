@@ -106,7 +106,7 @@ export default function TenantAdminHorarios() {
           {hours.map((h, i) => (
             <div
               key={h.dayOfWeek}
-              className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
+              className={`flex items-center gap-2 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all ${
                 h.isWorkingDay
                   ? "border-zinc-200 bg-zinc-50/50"
                   : "border-zinc-100 bg-zinc-50/30 opacity-60"
@@ -125,21 +125,21 @@ export default function TenantAdminHorarios() {
 
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-zinc-900">{dayLabels[h.dayOfWeek]}</p>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex flex-wrap items-center gap-2 mt-1">
                   {h.isWorkingDay ? (
                     <>
                       <input
                         type="time"
                         value={h.startTime}
                         onChange={(e) => updateTime(i, "startTime", e.target.value)}
-                        className="w-28 border border-zinc-300 rounded-lg px-2.5 py-1.5 text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
+                        className="w-24 sm:w-28 border border-zinc-300 rounded-lg px-2 sm:px-2.5 py-1.5 text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
                       />
                       <span className="text-xs text-zinc-400">até</span>
                       <input
                         type="time"
                         value={h.endTime}
                         onChange={(e) => updateTime(i, "endTime", e.target.value)}
-                        className="w-28 border border-zinc-300 rounded-lg px-2.5 py-1.5 text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
+                        className="w-24 sm:w-28 border border-zinc-300 rounded-lg px-2 sm:px-2.5 py-1.5 text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
                       />
                     </>
                   ) : (

@@ -15,6 +15,8 @@ import {
   LogOut,
   Globe,
   Clock,
+  Menu,
+  X,
 } from "lucide-react";
 import { useSaasUser } from "@/contexts/saas-user";
 
@@ -34,6 +36,7 @@ export default function TenantAdminLayout({ children }: { children: React.ReactN
   const router = useRouter();
   const tenantSlug = params.tenant as string;
   const { user, logout } = useSaasUser();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [tenant, setTenant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -76,8 +79,16 @@ export default function TenantAdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen bg-zinc-50 flex">
-      <aside className="w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col fixed h-full">
-        <div className="p-5 border-b border-zinc-800">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col transform transition-transform duration-200 ease-in-out ${
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      } lg:relative lg:translate-x-0`}>
+        <div className="p-5 border-b border-zinc-800 flex items-center justify-between">
           <Link href={basePath} className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground relative overflow-hidden">
               B
@@ -88,6 +99,12 @@ export default function TenantAdminLayout({ children }: { children: React.ReactN
               <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Admin</p>
             </div>
           </Link>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+          >
+            <X className="size-5" />
+          </button>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
@@ -147,16 +164,22 @@ export default function TenantAdminLayout({ children }: { children: React.ReactN
         </div>
       </aside>
 
-      <main className="flex-1 ml-64">
-        <header className="bg-white border-b border-zinc-200 h-16 flex items-center px-6">
-          <div className="flex items-center gap-3 text-sm text-zinc-500">
-            <span className="text-zinc-900 font-medium">{tenant.name}</span>
-            <span className="text-zinc-300">/</span>
-            <span className="text-zinc-400">{currentLabel}</span>
+      <main className="flex-1 lg:ml-64 min-w-0">
+        <header className="bg-white border-b border-zinc-200 h-16 flex items-center px-4 sm:px-6">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden mr-3 p-2 -ml-2 rounded-lg text-zinc-600 hover:bg-zinc-100 transition-colors"
+          >
+            <Menu className="size-5" />
+          </button>
+          <div className="flex items-center gap-2 sm:gap-3 text-sm text-zinc-500 min-w-0">
+            <span className="text-zinc-900 font-medium truncate">{tenant.name}</span>
+            <span className="text-zinc-300 shrink-0">/</span>
+            <span className="text-zinc-400 truncate">{currentLabel}</span>
           </div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2 shrink-0">
             {user && (
-              <span className="text-xs text-zinc-400">{user.name} {user.surname}</span>
+              <span className="hidden sm:block text-xs text-zinc-400">{user.name} {user.surname}</span>
             )}
           </div>
         </header>

@@ -112,57 +112,63 @@ export default function TenantAdminAppointments() {
           <div className="hidden lg:grid lg:grid-cols-[80px_120px_1fr_160px_200px] text-xs text-zinc-400 font-medium uppercase tracking-wider px-5 py-3 bg-zinc-50 border-b border-zinc-100">
             <span>Horário</span><span>Data</span><span>Cliente</span><span>Status</span><span className="text-right">Ações</span>
           </div>
-          <div className="divide-y divide-zinc-100">
+          <div className="grid gap-3 p-3 sm:p-0 sm:divide-y sm:divide-zinc-100">
             {appointments.map((apt) => (
-              <div key={apt.id} className="grid lg:grid-cols-[80px_120px_1fr_160px_200px] gap-3 px-5 py-4 hover:bg-zinc-50 transition-colors items-center">
-                <div className="flex sm:block items-center gap-3">
+              <div key={apt.id} className="lg:grid lg:grid-cols-[80px_120px_1fr_160px_200px] lg:gap-3 lg:px-5 lg:py-4 lg:hover:bg-zinc-50 lg:items-center bg-white rounded-xl border border-zinc-200 sm:border-0 sm:rounded-none p-4 sm:p-0 space-y-3 sm:space-y-0 shadow-sm sm:shadow-none">
+                <div className="flex items-center justify-between sm:block">
                   <div className="flex items-center gap-2 text-sm font-semibold text-zinc-800">
                     <Clock className="size-3.5 text-zinc-400" />
                     {format(new Date(apt.startTime), "HH:mm")}
+                    <span className="text-xs text-zinc-400 font-normal">- {format(new Date(apt.endTime), "HH:mm")}</span>
                   </div>
-                  <span className="text-xs text-zinc-400">{format(new Date(apt.endTime), "HH:mm")}</span>
+                  <span className="text-xs text-zinc-500 sm:hidden flex items-center gap-1">
+                    <Calendar className="size-3 text-zinc-400" />
+                    {format(new Date(apt.startTime), "dd/MM/yyyy")}
+                  </span>
                 </div>
-                <div className="text-sm text-zinc-500 flex items-center gap-2">
-                  <Calendar className="size-3.5 text-zinc-400 lg:hidden" />
+                <div className="hidden sm:block text-sm text-zinc-500">
                   {format(new Date(apt.startTime), "dd/MM/yyyy")}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-zinc-900 flex items-center gap-2">
-                    <User className="size-3.5 text-zinc-400" />{apt.customer.name}
+                    <User className="size-3.5 text-zinc-400 shrink-0" />{apt.customer.name}
                   </p>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1">
-                    <span className="text-xs text-zinc-400 flex items-center gap-1"><Phone className="size-3" />{apt.customer.phone}</span>
-                    <span className="text-xs text-zinc-400 flex items-center gap-1"><Scissors className="size-3" />{apt.service.name}</span>
+                    <span className="text-xs text-zinc-400 flex items-center gap-1"><Phone className="size-3 shrink-0" />{apt.customer.phone}</span>
+                    <span className="text-xs text-zinc-400 flex items-center gap-1"><Scissors className="size-3 shrink-0" />{apt.service.name}</span>
                   </div>
                 </div>
-                <div>
+                <div className="flex items-center justify-between sm:block gap-2">
                   <span className={`inline-block text-xs font-medium px-2.5 py-1 rounded-full border ${statusStyle[apt.status] || "bg-zinc-100 text-zinc-600"}`}>
                     {statusLabel[apt.status] || apt.status}
                   </span>
+                  {(apt.status === "completed" || apt.status === "cancelled") && (
+                    <span className="sm:hidden text-xs text-zinc-400 italic">{apt.status === "completed" ? "Finalizado" : "Cancelado"}</span>
+                  )}
                 </div>
-                <div className="flex items-center justify-end gap-1.5">
+                <div className="flex items-center gap-1.5 pt-1 sm:pt-0 sm:justify-end">
                   {apt.status === "confirmed" && (
                     <>
-                      <Button size="sm" variant="outline" onClick={() => updateStatus(apt.id, "completed")} className="text-xs h-8 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                      <Button size="sm" variant="outline" onClick={() => updateStatus(apt.id, "completed")} className="text-xs h-8 border-emerald-200 text-emerald-700 hover:bg-emerald-50 flex-1 sm:flex-none">
                         <CheckCircle2 className="size-3.5 mr-1" />Finalizar
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => updateStatus(apt.id, "cancelled")} className="text-xs h-8 border-red-200 text-red-600 hover:bg-red-50">
+                      <Button size="sm" variant="outline" onClick={() => updateStatus(apt.id, "cancelled")} className="text-xs h-8 border-red-200 text-red-600 hover:bg-red-50 flex-1 sm:flex-none">
                         <XCircle className="size-3.5 mr-1" />Cancelar
                       </Button>
                     </>
                   )}
                   {apt.status === "pending" && (
                     <>
-                      <Button size="sm" variant="outline" onClick={() => updateStatus(apt.id, "confirmed")} className="text-xs h-8 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                      <Button size="sm" variant="outline" onClick={() => updateStatus(apt.id, "confirmed")} className="text-xs h-8 border-emerald-200 text-emerald-700 hover:bg-emerald-50 flex-1 sm:flex-none">
                         <CheckCircle2 className="size-3.5 mr-1" />Confirmar
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => updateStatus(apt.id, "cancelled")} className="text-xs h-8 border-red-200 text-red-600 hover:bg-red-50">
+                      <Button size="sm" variant="outline" onClick={() => updateStatus(apt.id, "cancelled")} className="text-xs h-8 border-red-200 text-red-600 hover:bg-red-50 flex-1 sm:flex-none">
                         <XCircle className="size-3.5 mr-1" />Cancelar
                       </Button>
                     </>
                   )}
                   {(apt.status === "completed" || apt.status === "cancelled") && (
-                    <span className="text-xs text-zinc-400 px-3 italic">{apt.status === "completed" ? "Finalizado" : "Cancelado"}</span>
+                    <span className="hidden sm:inline text-xs text-zinc-400 px-3 italic">{apt.status === "completed" ? "Finalizado" : "Cancelado"}</span>
                   )}
                 </div>
               </div>
