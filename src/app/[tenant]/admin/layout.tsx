@@ -13,7 +13,6 @@ import {
   Settings,
   ChevronRight,
   LogOut,
-  Store,
   Globe,
   Clock,
 } from "lucide-react";
@@ -25,7 +24,6 @@ const navItems = [
   { href: "servicos", label: "Serviços", icon: Scissors },
   { href: "barbeiros", label: "Barbeiros", icon: Users },
   { href: "horarios", label: "Horários", icon: Clock },
-  { href: "clientes", label: "Clientes", icon: Store },
   { href: "financeiro", label: "Financeiro", icon: DollarSign },
   { href: "configuracoes", label: "Configurações", icon: Settings },
 ];
