@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Plus, Pencil, Power, X, Trash2 } from "lucide-react";
 import { BarberPole, Mustache, ScissorsIcon } from "@/components/barber-icons";
 import { useSaasUser } from "@/contexts/saas-user";
+import gsap from "gsap";
 
 const categories = [
   { value: "corte", label: "Corte" },
@@ -29,6 +30,11 @@ export default function AdminServices() {
   const [form, setForm] = useState({ name: "", price: "", duration: "", category: "corte" });
   const tenantSlug = tenant?.slug;
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
+
   async function loadServices() {
     if (!tenantSlug) return;
     setLoading(true);
@@ -39,6 +45,56 @@ export default function AdminServices() {
   }
 
   useEffect(() => { if (tenantSlug) loadServices(); }, [tenantSlug]);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      if (headerRef.current?.children) {
+        gsap.from(headerRef.current.children, {
+          y: -20,
+          opacity: 0,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: "power2.out",
+        });
+      }
+      if (bgRef.current?.children) {
+        gsap.from(bgRef.current.children, {
+          scale: 0.8,
+          opacity: 0,
+          duration: 1.2,
+          ease: "power1.out",
+        });
+      }
+    });
+    return () => ctx.revert();
+  }, []);
+
+  useEffect(() => {
+    if (!loading && services.length > 0 && tableRef.current) {
+      const rows = tableRef.current.querySelectorAll("tbody tr");
+      if (rows.length > 0) {
+        gsap.from(rows, {
+          y: 12,
+          opacity: 0,
+          duration: 0.35,
+          stagger: 0.04,
+          ease: "power2.out",
+          clearProps: "all",
+        });
+      }
+    }
+  }, [loading, services]);
+
+  useEffect(() => {
+    if (showForm && formRef.current) {
+      gsap.from(formRef.current, {
+        y: -20,
+        opacity: 0,
+        duration: 0.35,
+        ease: "power2.out",
+      });
+    }
+  }, [showForm]);
 
   async function saveService(e: React.FormEvent) {
     e.preventDefault();
@@ -97,12 +153,12 @@ export default function AdminServices() {
 
   return (
     <div className="p-6 relative">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-[0.015]">
+      <div ref={bgRef} className="fixed inset-0 pointer-events-none overflow-hidden opacity-[0.015]">
         <BarberPole className="absolute top-40 -right-10 w-32 h-80 text-zinc-900" />
         <Mustache className="absolute bottom-20 left-12 w-20 text-zinc-900" />
       </div>
 
-      <div className="flex items-center justify-between mb-8">
+      <div ref={headerRef} className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">Serviços</h1>
           <p className="text-sm text-zinc-500 mt-1">{services.length} serviços cadastrados</p>
@@ -114,7 +170,7 @@ export default function AdminServices() {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-xl border border-zinc-200 shadow-sm mb-8 overflow-hidden">
+        <div ref={formRef} className="bg-white rounded-xl border border-zinc-200 shadow-sm mb-8 overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
             <h2 className="text-sm font-semibold text-zinc-900">
               {editService ? "Editar Serviço" : "Novo Serviço"}
@@ -150,7 +206,7 @@ export default function AdminServices() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+      <div ref={tableRef} className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
