@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendWhatsApp, formatDateTime } from "@/lib/whatsapp";
+import { sendWhatsAppIfPro, formatDateTime } from "@/lib/whatsapp";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
       `Chegando lá! 🫱🏻‍🫲🏾`,
     ].join("\n");
 
-    await sendWhatsApp(apt.customer.phone, msg);
+    await sendWhatsAppIfPro(apt.tenantId, apt.customer.phone, msg);
 
     await prisma.appointment.update({
       where: { id: apt.id },

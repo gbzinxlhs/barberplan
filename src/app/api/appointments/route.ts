@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendWhatsApp, formatDateTime } from "@/lib/whatsapp";
+import { sendWhatsAppIfPro, formatDateTime } from "@/lib/whatsapp";
 
 export async function POST(request: Request) {
   try {
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
       `Nos vemos lá! 🫱🏻‍🫲🏾`,
     ].join("\n");
 
-    sendWhatsApp(customer.phone, customerMsg);
+    sendWhatsAppIfPro(tenant.id, customer.phone, customerMsg);
 
     const barberShopPhone = tenant.whatsapp || tenant.phone;
     if (barberShopPhone) {
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
         `💳 Pagamento: ${methodLabel}`,
       ].join("\n");
 
-      sendWhatsApp(barberShopPhone, barberMsg);
+      sendWhatsAppIfPro(tenant.id, barberShopPhone, barberMsg);
     }
 
     return NextResponse.json({ appointment, customer }, { status: 201 });

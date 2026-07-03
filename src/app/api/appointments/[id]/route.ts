@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth-saas";
-import { sendWhatsApp, formatDateTime } from "@/lib/whatsapp";
+import { sendWhatsAppIfPro, formatDateTime } from "@/lib/whatsapp";
 
 export async function PATCH(
   request: Request,
@@ -48,7 +48,7 @@ export async function PATCH(
     `📅 Data: ${dateStr}`,
   ].join("\n");
 
-  sendWhatsApp(existing.customer.phone, msg);
+  sendWhatsAppIfPro(existing.tenantId, existing.customer.phone, msg);
 
   return NextResponse.json({ appointment });
 }

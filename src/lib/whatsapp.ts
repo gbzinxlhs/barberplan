@@ -1,3 +1,5 @@
+import { prisma } from "@/lib/prisma";
+
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_WHATSAPP_NUMBER = process.env.TWILIO_WHATSAPP_NUMBER;
@@ -40,6 +42,25 @@ export async function sendWhatsApp(to: string, body: string): Promise<void> {
   } catch (error) {
     console.error("[WHATSAPP] Error:", error);
   }
+}
+
+export async function isProTenant(tenantId: string): Promise<boolean> {
+  const owner = await prisma.saasUser.findFirst({
+    where: { tenantId, plan: "pro" },
+  });
+  return !!owner;
+}
+
+export async function sendWhatsAppIfPro(
+  tenantId: string,
+  to: string,
+  body: string
+): Promise<void> {
+  if (!(await isProTenant(tenantId))) {
+    console.log(`[WHATSAPP] Skipped (not pro) To: ${to}`);
+    return;
+  }
+  return sendWhatsApp(to, body);
 }
 
 export function formatDateTime(d: Date): string {
