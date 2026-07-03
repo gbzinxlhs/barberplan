@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 import {
   Calendar,
   BarChart3,
@@ -141,6 +145,58 @@ function HomeContent() {
   const { user } = useSaasUser();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  const heroRef = useRef<HTMLDivElement>(null);
+  const destaquesRef = useRef<HTMLDivElement>(null);
+  const entregaveisRef = useRef<HTMLDivElement>(null);
+  const processoRef = useRef<HTMLDivElement>(null);
+  const publicoRef = useRef<HTMLDivElement>(null);
+  const planosRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      if (heroRef.current) {
+        const els = heroRef.current.querySelectorAll<HTMLElement>(".gsap-hero");
+        gsap.from(els, {
+          y: 40,
+          opacity: 0,
+          duration: 0.7,
+          stagger: 0.15,
+          ease: "power3.out",
+        });
+      }
+
+      const sections = [
+        destaquesRef.current,
+        entregaveisRef.current,
+        processoRef.current,
+        publicoRef.current,
+        planosRef.current,
+        ctaRef.current,
+      ];
+
+      sections.forEach((section) => {
+        if (!section) return;
+        const cards = section.querySelectorAll<HTMLElement>(".gsap-card");
+        if (cards.length === 0) return;
+        gsap.from(cards, {
+          y: 40,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        });
+      });
+    });
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* top announcement bar */}
@@ -204,7 +260,7 @@ function HomeContent() {
 
       <main>
         {/* ===== HERO ===== */}
-        <section className="overflow-hidden relative bg-zinc-950">
+        <section ref={heroRef} className="overflow-hidden relative bg-zinc-950">
           <div className="absolute inset-0 opacity-[0.05] pointer-events-none hidden lg:block">
             <BarberChair className="absolute w-16 -top-4 right-[15%] text-white animate-float" style={{ animationDelay: "-2s" }} />
             <Mustache className="absolute w-20 top-[20%] left-[5%] text-white animate-sway" style={{ animationDelay: "-1s" }} />
@@ -214,19 +270,19 @@ function HomeContent() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32 relative z-10">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 bg-zinc-800 rounded-full px-3 py-1 text-xs font-medium text-zinc-400 mb-6">
+                <div className="gsap-hero inline-flex items-center gap-2 bg-zinc-800 rounded-full px-3 py-1 text-xs font-medium text-zinc-400 mb-6">
                   <ScissorsIcon className="size-3 text-zinc-400" />
                   Sistema completo para barbearias
                 </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.05] tracking-tight">
+                <h1 className="gsap-hero text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.05] tracking-tight">
                   Gestão inteligente para sua{" "}
                   <span className="text-primary">barbearia</span>
                 </h1>
-                <p className="mt-5 text-lg text-zinc-400 max-w-xl leading-relaxed">
+                <p className="gsap-hero mt-5 text-lg text-zinc-400 max-w-xl leading-relaxed">
                   Agendamento online, gestão de clientes, controle financeiro e
                   lembretes via WhatsApp. Sua barbearia no piloto automático.
                 </p>
-                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <div className="gsap-hero mt-6 flex flex-col sm:flex-row gap-3">
                   <Link
                     href="#planos"
                     className="bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2"
@@ -263,7 +319,7 @@ function HomeContent() {
         </section>
 
         {/* ===== DESTAQUES ===== */}
-        <section className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
+        <section ref={destaquesRef} className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-3">
@@ -279,25 +335,25 @@ function HomeContent() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                {
-                  title: "Agendamento Online",
-                  desc: "Clientes agendam 24h pelo link da sua barbearia. Sem telefonemas, sem atrito. Escolhem barbeiro, serviço e horário em segundos.",
-                  icon: Calendar,
-                },
-                {
-                  title: "Gestão de Clientes",
-                  desc: "Histórico completo de cada cliente. Saiba o que ele já fez, quanto gastou e quando voltou. Fidelização na palma da mão.",
-                  icon: Users,
-                },
-                {
-                  title: "Controle Financeiro",
-                  desc: "Relatórios de faturamento, comissões, despesas e métodos de pagamento. Saiba exatamente quanto entrou no caixa.",
-                  icon: DollarSign,
-                },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.title} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 relative group hover:border-zinc-700 transition-colors">
+                  {
+                    title: "Agendamento Online",
+                    desc: "Clientes agendam 24h pelo link da sua barbearia. Sem telefonemas, sem atrito. Escolhem barbeiro, serviço e horário em segundos.",
+                    icon: Calendar,
+                  },
+                  {
+                    title: "Gestão de Clientes",
+                    desc: "Histórico completo de cada cliente. Saiba o que ele já fez, quanto gastou e quando voltou. Fidelização na palma da mão.",
+                    icon: Users,
+                  },
+                  {
+                    title: "Controle Financeiro",
+                    desc: "Relatórios de faturamento, comissões, despesas e métodos de pagamento. Saiba exatamente quanto entrou no caixa.",
+                    icon: DollarSign,
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.title} className="gsap-card rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 relative group hover:border-zinc-700 transition-colors">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
                       <Icon className="size-6 text-primary" />
                     </div>
@@ -311,7 +367,7 @@ function HomeContent() {
         </section>
 
         {/* ===== O QUE VOCÊ RECEBE ===== */}
-        <section className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
+        <section ref={entregaveisRef} className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-3">
@@ -338,7 +394,7 @@ function HomeContent() {
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.label} className="flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 group hover:border-zinc-700 transition-colors">
+                  <div key={item.label} className="gsap-card flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 group hover:border-zinc-700 transition-colors">
                     <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                       <Icon className="size-4 text-primary" />
                     </div>
@@ -351,7 +407,7 @@ function HomeContent() {
         </section>
 
         {/* ===== COMO FUNCIONA ===== */}
-        <section className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
+        <section ref={processoRef} className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-3">
@@ -393,7 +449,7 @@ function HomeContent() {
                   desc: "Acompanhe relatórios, atraia mais clientes e expanda suas unidades.",
                 },
               ].map((step) => (
-                <div key={step.num} className="text-center relative">
+                <div key={step.num} className="gsap-card text-center relative">
                   <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span className="text-xl font-bold text-primary">{step.num}</span>
                   </div>
@@ -406,7 +462,7 @@ function HomeContent() {
         </section>
 
         {/* ===== PARA QUEM SERVE ===== */}
-        <section className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
+        <section ref={publicoRef} className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-3">
@@ -440,7 +496,7 @@ function HomeContent() {
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.title} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 relative group hover:border-zinc-700 transition-colors">
+                  <div key={item.title} className="gsap-card rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 relative group hover:border-zinc-700 transition-colors">
                     <Icon className="size-10 text-primary mb-5" />
                     <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
                     <p className="text-sm text-zinc-400 leading-relaxed">{item.desc}</p>
@@ -452,7 +508,7 @@ function HomeContent() {
         </section>
 
         {/* ===== PLANOS ===== */}
-        <section id="planos" className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
+        <section ref={planosRef} id="planos" className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative z-10">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-3">
@@ -473,7 +529,7 @@ function HomeContent() {
                 return (
                   <div
                     key={plan.name}
-                    className={`rounded-2xl border relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 ${
+                    className={`gsap-card rounded-2xl border relative overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 ${
                       plan.highlight
                         ? "border-zinc-700 bg-gradient-to-b from-zinc-900 to-zinc-950"
                         : "border-primary/40 bg-zinc-900 ring-1 ring-primary/30"
@@ -601,7 +657,7 @@ function HomeContent() {
         </section>
 
         {/* ===== CTA FINAL ===== */}
-        <section className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
+        <section ref={ctaRef} className="relative overflow-hidden bg-zinc-950 border-t border-zinc-800">
           <div className="absolute inset-0 opacity-[0.05] pointer-events-none hidden sm:block">
             <BarberChair className="absolute w-20 top-[5%] left-[10%] text-white animate-float" style={{ animationDelay: "-1s" }} />
             <Comb className="absolute w-24 top-[10%] right-[15%] text-white animate-drift" style={{ animationDelay: "-3s" }} />
@@ -609,7 +665,7 @@ function HomeContent() {
             <ScissorsIcon className="absolute w-10 top-[40%] left-[40%] text-white animate-sway" style={{ animationDelay: "-1.5s" }} />
           </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center relative z-10">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <h2 className="gsap-card text-3xl sm:text-4xl font-bold text-white mb-4">
               Pronto para transformar sua barbearia?
             </h2>
             <p className="text-zinc-400 mb-8 max-w-md mx-auto">
