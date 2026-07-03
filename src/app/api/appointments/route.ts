@@ -108,6 +108,8 @@ export async function GET(request: Request) {
   const tenantSlug = searchParams.get("tenant");
   const date = searchParams.get("date");
   const barberId = searchParams.get("barberId");
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const pageSize = parseInt(searchParams.get("pageSize") || "20", 10);
 
   if (!tenantSlug) {
     return NextResponse.json({ error: "Tenant slug required" }, { status: 400 });
@@ -130,15 +132,26 @@ export async function GET(request: Request) {
     where.barberId = barberId;
   }
 
-  const appointments = await prisma.appointment.findMany({
-    where,
-    include: {
-      barber: true,
-      service: true,
-      customer: true,
-    },
-    orderBy: { startTime: "asc" },
-  });
+  const [appointments, total] = await Promise.all([
+    prisma.appointment.findMany({
+      where,
+      include: {
+        barber: true,
+        service: true,
+        customer: true,
+      },
+      orderBy: { startTime: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.appointment.count({ where }),
+  ]);
 
-  return NextResponse.json({ appointments });
+  return NextResponse.json({
+    appointments,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+  });
 }

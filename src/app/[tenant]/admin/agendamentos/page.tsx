@@ -36,18 +36,26 @@ export default function TenantAdminAppointments() {
   const tenantSlug = params.tenant as string;
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const pageSize = 20;
 
-  async function loadAppointments() {
+  async function loadAppointments(p?: number) {
     if (!tenantSlug) return;
+    const currentPage = p ?? page;
     setLoading(true);
-    const res = await fetch(`/api/appointments?tenant=${tenantSlug}`);
+    const res = await fetch(`/api/appointments?tenant=${tenantSlug}&page=${currentPage}&pageSize=${pageSize}`);
     const data = await res.json();
     setAppointments(data.appointments || []);
+    setTotal(data.total || 0);
+    setTotalPages(data.totalPages || 1);
+    setPage(currentPage);
     setLoading(false);
   }
 
   useEffect(() => {
-    if (tenantSlug) loadAppointments();
+    if (tenantSlug) loadAppointments(1);
   }, [tenantSlug]);
 
   async function updateStatus(id: string, status: string) {
@@ -56,10 +64,9 @@ export default function TenantAdminAppointments() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
-    loadAppointments();
+    loadAppointments(page);
   }
 
-  const total = appointments.length;
   const confirmed = appointments.filter((a) => a.status === "confirmed").length;
   const pending = appointments.filter((a) => a.status === "pending").length;
   const completed = appointments.filter((a) => a.status === "completed").length;
@@ -77,7 +84,7 @@ export default function TenantAdminAppointments() {
           <h1 className="text-2xl font-bold text-zinc-900">Agendamentos</h1>
           <p className="text-sm text-zinc-500 mt-1">Todos os agendamentos em ordem cronológica</p>
         </div>
-        <Button variant="outline" size="sm" onClick={loadAppointments} className="gap-1.5">
+        <Button variant="outline" size="sm" onClick={() => loadAppointments(page)} className="gap-1.5">
           <RefreshCw className="size-3.5" />
           Atualizar
         </Button>
@@ -177,8 +184,41 @@ export default function TenantAdminAppointments() {
         </div>
       )}
 
-      {!loading && appointments.length > 0 && (
-        <p className="text-xs text-zinc-400 mt-4 text-center">{appointments.length} agendamento{appointments.length !== 1 ? "s" : ""} no total</p>
+      {!loading && total > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6">
+          <p className="text-xs text-zinc-400">
+            {total} agendamento{total !== 1 ? "s" : ""} no total
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => loadAppointments(page - 1)}
+              disabled={page <= 1}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Anterior
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <button
+                key={p}
+                onClick={() => loadAppointments(p)}
+                className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
+                  p === page
+                    ? "bg-zinc-900 text-white"
+                    : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+            <button
+              onClick={() => loadAppointments(page + 1)}
+              disabled={page >= totalPages}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Próximo
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
