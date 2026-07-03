@@ -15,6 +15,7 @@ import {
   CreditCard,
   DollarSign,
   Users,
+  Trash2,
 } from "lucide-react";
 import { useSuperAdmin } from "@/contexts/super-admin";
 
@@ -44,6 +45,8 @@ export default function SuperAdminDashboard() {
   const { token } = useSuperAdmin();
   const [tenants, setTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   async function loadTenants() {
     setLoading(true);
@@ -57,6 +60,21 @@ export default function SuperAdminDashboard() {
       setTenants([]);
     }
     setLoading(false);
+  }
+
+  async function handleDelete(tenantId: string) {
+    setDeleting(tenantId);
+    try {
+      const res = await fetch(`/api/super-admin/tenants/${tenantId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setTenants((prev) => prev.filter((t) => t.id !== tenantId));
+      }
+    } catch {}
+    setDeleting(null);
+    setConfirmDelete(null);
   }
 
   useEffect(() => {
@@ -147,12 +165,13 @@ export default function SuperAdminDashboard() {
                 <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-500 uppercase tracking-wider">Compra</th>
                 <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-500 uppercase tracking-wider">Expira</th>
                 <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
+                <th className="text-right px-5 py-3.5 text-xs font-medium text-zinc-500 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-zinc-500 text-sm">
+                  <td colSpan={9} className="text-center py-12 text-zinc-500 text-sm">
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                       Carregando...
@@ -161,7 +180,7 @@ export default function SuperAdminDashboard() {
                 </tr>
               ) : tenants.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-zinc-500 text-sm">
+                  <td colSpan={9} className="text-center py-12 text-zinc-500 text-sm">
                     Nenhuma barbearia encontrada
                   </td>
                 </tr>
@@ -237,6 +256,33 @@ export default function SuperAdminDashboard() {
                             <XCircle className="size-3" />
                             {owner?.plan === "free" ? "Grátis" : "Expirado"}
                           </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        {confirmDelete === tenant.id ? (
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleDelete(tenant.id)}
+                              disabled={deleting === tenant.id}
+                              className="text-xs bg-red-500/20 text-red-400 font-medium px-2.5 py-1.5 rounded-lg hover:bg-red-500/30 transition-colors disabled:opacity-50"
+                            >
+                              {deleting === tenant.id ? "Excluindo..." : "Confirmar"}
+                            </button>
+                            <button
+                              onClick={() => setConfirmDelete(null)}
+                              className="text-xs text-zinc-500 hover:text-zinc-300 px-2 py-1.5"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmDelete(tenant.id)}
+                            className="text-zinc-600 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-red-500/10"
+                            title="Excluir barbearia"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
                         )}
                       </td>
                     </tr>

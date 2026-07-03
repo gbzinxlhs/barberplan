@@ -1,0 +1,99 @@
+=== ALTERAÇÕES REALIZADAS ===
+
+## 1. Admin Redirect - Ordem corrigida
+- Arquivo: src/app/admin/layout.tsx
+- O redirect para "/" acontecia antes de verificar /admin/setup e /admin/cadastro
+- FIX: verificar setup/cadastro primeiro, aguardar state "ready"
+
+## 2. Auto-suggest Slug na Setup Page
+- Arquivo: src/app/admin/setup/content.tsx
+- Slug é sugerido automaticamente a partir do nome da barbearia
+- Se o usuário editar manualmente, o auto-suggest desliga
+- Ao salvar, atualiza o saas_tenant no localStorage com o novo slug
+
+## 3. create-payment - Cria tenant ao gerar Pix
+- Arquivo: src/app/api/asaas/create-payment/route.ts
+- Agora cria um tenant automaticamente (slug a partir de nome+sobrenome) junto com o Pix
+- Retorna tenantSlug para o checkout
+- externalReference agora é JSON { userId, plan, billing } em vez de apenas userId
+
+## 4. Webhook - Lê plan+billing corretos
+- Arquivo: src/app/api/asaas/webhook/route.ts
+- Antes hardcodava plan="pro" e 1 ano de expiry
+- Agora parseia o externalReference como JSON para obter plan e billing
+- Define expiry correto: 1 mês para monthly, 1 ano para annual
+
+## 5. Checkout - Armazena tenant slug após Pix
+- Arquivo: src/app/checkout/content.tsx
+- Após gerar Pix, armazena tenantSlug no localStorage
+- Exibe "Configurar Barbearia" imediatamente
+
+## 6. Botão "Acessar" condicional ao plano
+- Arquivo: src/app/page.tsx
+- "Acessar" só aparece para usuários com plano ativo (plan !== "free")
+- Usuários logados sem plano veem "Escolher Plano" que leva a #planos
+- Usuários não logados veem "Planos"
+
+## 7. Página de Horários de Funcionamento (nova)
+- Arquivo: src/app/[tenant]/admin/horarios/page.tsx (NOVO)
+- Formulário com os 7 dias da semana
+- Toggle abre/fecha por dia
+- Inputs de hora início/fim
+- Salva em lote via PUT /api/working-hours
+
+## 8. API Working Hours (nova)
+- Arquivo: src/app/api/working-hours/route.ts (NOVO)
+- GET: lista horários de funcionamento por tenantId
+- PUT: substitui todos os horários em lote (protegida: requer JWT + ownership)
+
+## 9. Sidebar Admin - Item "Horários" adicionado
+- Arquivo: src/app/[tenant]/admin/layout.tsx
+- Novo item "Horários" entre Barbeiros e Clientes
+
+## 10. Horários padrão na criação do tenant
+- Arquivo: src/lib/working-hours.ts (NOVO)
+- Função createDefaultWorkingHours(tenantId) cria registros padrão:
+  - Seg-Sex: 09:00-19:00, Sáb: 09:00-17:00, Dom: fechado
+- Chamada em:
+  - src/app/api/saas-users/purchase/route.ts (trial)
+  - src/app/api/asaas/create-payment/route.ts (Pix)
+
+## 11. Aba "Clientes" removida do sidebar da barbearia
+- Arquivo: src/app/[tenant]/admin/layout.tsx
+- "Clientes" removido do navItems (funcionalidade exclusiva do Super Admin)
+
+## 12. Financeiro - Dados reais (sem fictícios)
+- Arquivo: src/app/[tenant]/admin/financeiro/page.tsx (REESCRITO)
+- Removeu todos os dados fictícios (nomes, valores, comissões)
+- Agora busca agendamentos reais do mês via API
+- Calcula: faturamento bruto, total de agendamentos, ticket médio
+- Faturamento por Serviço: agrupado por serviço com dados reais
+- Seção "Comissão por Barbeiro" removida
+- Transações Recentes: últimas 10 com dados reais
+- Estado vazio: mostra mensagem se não há agendamentos no mês
+
+## 13. SEGURANÇA - JWT em cookie httpOnly
+
+### Novos arquivos:
+- src/lib/auth-saas.ts - Lib JWT: sign, verify, cookie helpers
+- src/lib/api-auth.ts - Helpers requireOwner e requireSuperAdmin
+- src/app/api/auth/saas/login/route.ts - Login por email, cria cookie
+- src/app/api/auth/saas/signup/route.ts - Cadastro + login automático
+- src/app/api/auth/saas/logout/route.ts - Remove cookie
+- src/app/api/auth/saas/me/route.ts - Retorna user do cookie
+
+### Arquivos alterados:
+- src/contexts/saas-user.tsx - Contexto agora usa cookie (não localStorage)
+- src/components/saas-login.tsx - Login/signup chamam as novas APIs
+
+### API routes protegidas (requerem JWT + ownership):
+- PATCH /api/tenants/[slug]
+- POST /api/barbers
+- PATCH /api/barbers/[id]
+- DELETE /api/barbers/[id]
+- POST /api/services
+- PATCH /api/services/[id]
+- DELETE /api/services/[id]
+- PATCH /api/appointments/[id]
+- DELETE /api/appointments/[id]
+- PUT /api/working-hours
