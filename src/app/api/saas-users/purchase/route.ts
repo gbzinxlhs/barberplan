@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { createDefaultWorkingHours } from "@/lib/working-hours";
 
 function generateSlug(name: string, surname: string): string {
   const base = `${name}-${surname}`
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
         primaryColor: "#22c55e",
       },
     });
+    await createDefaultWorkingHours(tenant.id);
     tenantId = tenant.id;
   }
 
