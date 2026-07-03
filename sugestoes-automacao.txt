@@ -1,0 +1,139 @@
+SUGESTOES DE AUTOMACAO PARA AGENDAMENTOS - BarberPlan
+====================================================
+
+DATA: Jul 2026
+
+---
+
+DIAGNOSTICO DO SISTEMA ATUAL:
+
+  Problema                                    Impacto
+  -----------------------------------------------------------------
+  Agendamento ja nasce "confirmed"             Sem chance de barbeiro aprovar antes
+  Zero notificacoes (WhatsApp)                 Cliente nao recebe confirmacao, lembrete,
+                                               nem aviso de cancelamento
+  Sem tarefa agendada (cron)                   Ninguem atualiza status automaticamente:
+                                               agendamentos antigos ficam "confirmed"
+                                               pra sempre
+  Sem verificacao server-side de conflito      Booking so filtra no front-end
+
+
+CAMINHOS DISPONIVEIS:
+
+========================================================================
+CAMINHO 1 - NOTIFICACOES VIA WHATSAPP (maior valor pro negocio)
+========================================================================
+
+O QUE FAZ:
+  - Ao criar agendamento: envia confirmacao pro cliente + aviso na barbearia
+  - 1h antes: lembrete automatico pro cliente
+  - Admin muda status (cancelar/finalizar): notifica cliente
+
+OPCOES DE API:
+
+  a) Twilio (recomendado)
+     - Confiavel, API REST simples (~R$0,03/msg)
+     - Precisa de numero verificado no WhatsApp Business
+     - Integracao: 1 lib (twilio) + 2-3 API routes
+
+  b) Evolution API
+     - Self-hosted (roda no seu servidor)
+     - Muito popular no Brasil, gratuito
+     - Precisa manter um servico Node rodando
+
+IMPLEMENTACAO:
+  - Criar src/lib/whatsapp.ts (envio de mensagens)
+  - Criar src/app/api/notifications/route.ts (disparo pos-agendamento)
+  - Adicionar trigger no POST /api/appointments
+  - Cron job para lembretes 1h antes
+
+ARQUIVOS:
+  - src/lib/whatsapp.ts         -> funcao sendWhatsApp(phone, message)
+  - src/app/api/notifications/  -> rotas de notificacao
+  - .env: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_NUMBER
+
+DEPENDENCIAS:
+  npm install twilio
+
+
+========================================================================
+CAMINHO 2 - CRON JOB PARA AUTO-ATUALIZAR STATUS
+========================================================================
+
+O QUE FAZ:
+  - A cada 1 minuto, cron-job.org chama /api/cron/appointments
+  - Regras:
+    * "confirmed" + startTime passou +30min sem alteracao -> auto-cancela (no-show)
+    * "confirmed" + endTime ja passou -> auto-completa
+    * "pending" + startTime passou -15min -> auto-cancela
+
+IMPLEMENTACAO:
+  - Criar 1 arquivo: src/app/api/cron/appointments/route.ts
+  - Usar crypto ou header secreto (CRON_SECRET) pra proteger a rota
+  - Configurar cron-job.org para bater na rota a cada 1 min
+
+ARQUIVOS:
+  - src/app/api/cron/appointments/route.ts   -> logica de atualizacao em lote
+  - .env: CRON_SECRET
+
+ARVORE DE DECISAO DE STATUS (para o cron):
+
+                    startTime + 30min
+                    sem check-in
+  confirmed ──────────────────────────> cancelled (no-show)
+  
+                    endTime passou
+  confirmed ──────────────────────────> completed
+
+                    startTime passou 15min
+  pending ────────────────────────────> cancelled
+
+DEPENDENCIAS:
+  Nenhuma (so usa Prisma + datas)
+
+
+========================================================================
+CAMINHO 3 - FLUXO DE APROVACAO (OPCIONAL)
+========================================================================
+
+O QUE FAZ:
+  - Admin escolhe no Setup: "Agendamentos precisam de aprovacao?"
+  - Se sim: agendamento nasce "pending", admin precisa clicar "Confirmar"
+  - Se nao: agendamento nasce "confirmed" (comportamento atual)
+  - Quando admin confirma (pending -> confirmed): notifica cliente
+
+IMPLEMENTACAO:
+  - Adicionar campo Tenant.approvalRequired (boolean, default false)
+  - POST /api/appointments: se tenant.approvalRequired -> status "pending"
+  - Admin panel: badge "Aguardando aprovacao" + botao "Confirmar"
+  - Unir com Caminho 1 para notificar cliente ao confirmar
+
+ARQUIVOS:
+  - prisma/schema.prisma: + approvalRequired @default(false)
+  - src/lib/tenant.ts: + campo no GET
+  - src/app/[tenant]/admin/agendamentos/page.tsx: + estado pending
+  - src/app/[tenant]/admin/configuracoes/page.tsx: + toggle
+
+DEPENDENCIAS:
+  npm install prisma db push (schema change)
+
+
+========================================================================
+COMPARATIVO (o que fazer primeiro?)
+========================================================================
+
+  Caminho          Esforco    Impacto     Depende de
+  ----------------------------------------------------------------
+  1 - WhatsApp     Medio      Altissimo   Conta Twilio / Evolution API
+  2 - Cron         Baixo      Alto        Nada
+  3 - Aprovacao    Baixo      Medio       Nada
+
+  ORDEM RECOMENDADA:
+    1o -> Caminho 2 (cron) — rapido, sem dependencias, resolve
+          agendamentos que ficam presos
+    2o -> Caminho 1 (WhatsApp) — maior valor pro negocio
+    3o -> Caminho 3 (aprovacao) — opcional, depois que os dois
+          primeiros estiverem rodando
+
+
+========================================================================
