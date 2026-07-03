@@ -157,12 +157,14 @@ function HomeContent() {
     const ctx = gsap.context(() => {
       if (heroRef.current) {
         const els = heroRef.current.querySelectorAll<HTMLElement>(".gsap-hero");
-        gsap.from(els, {
-          y: 40,
-          opacity: 0,
+        gsap.set(els, { y: 40, opacity: 0 });
+        gsap.to(els, {
+          y: 0,
+          opacity: 1,
           duration: 0.7,
           stagger: 0.15,
           ease: "power3.out",
+          delay: 0.2,
         });
       }
 
@@ -179,9 +181,10 @@ function HomeContent() {
         if (!section) return;
         const cards = section.querySelectorAll<HTMLElement>(".gsap-card");
         if (cards.length === 0) return;
-        gsap.from(cards, {
-          y: 40,
-          opacity: 0,
+        gsap.set(cards, { y: 40, opacity: 0 });
+        gsap.to(cards, {
+          y: 0,
+          opacity: 1,
           duration: 0.6,
           stagger: 0.1,
           ease: "power2.out",
@@ -189,12 +192,21 @@ function HomeContent() {
             trigger: section,
             start: "top 85%",
             toggleActions: "play none none none",
+            invalidateOnRefresh: true,
           },
         });
       });
+
+      ScrollTrigger.refresh();
     });
 
-    return () => ctx.revert();
+    const handleLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", handleLoad);
+
+    return () => {
+      ctx.revert();
+      window.removeEventListener("load", handleLoad);
+    };
   }, []);
 
   return (
