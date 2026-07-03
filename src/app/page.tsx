@@ -297,15 +297,7 @@ function HomeContent() {
             alt="Barbearia"
             className="gsap-parallax absolute inset-0 w-full h-[120%] object-cover -top-[10%]"
           />
-          <div className="absolute top-6 left-6 z-30 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
-              <ScissorsIcon className="size-5 text-primary-foreground" />
-            </div>
-            <div>
-              <span className="text-lg font-bold text-white">Barber</span>
-              <span className="text-lg font-bold text-primary">Plan</span>
-            </div>
-          </div>
+
           <div className="absolute inset-0 z-30 flex items-center">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
               <div className="max-w-2xl">
