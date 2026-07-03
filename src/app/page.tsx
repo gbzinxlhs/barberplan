@@ -166,6 +166,20 @@ function HomeContent() {
           ease: "power3.out",
           delay: 0.2,
         });
+
+        const parallax = heroRef.current.querySelector<HTMLElement>(".gsap-parallax");
+        if (parallax) {
+          gsap.to(parallax, {
+            y: () => parallax.offsetHeight * 0.15,
+            ease: "none",
+            scrollTrigger: {
+              trigger: heroRef.current,
+              start: "top top",
+              end: "bottom top",
+              scrub: true,
+            },
+          });
+        }
       }
 
       const sections = [
@@ -273,68 +287,63 @@ function HomeContent() {
       </header>
 
       <main>
-        {/* ===== HERO ===== */}
-        <section ref={heroRef} className="overflow-hidden relative bg-zinc-950">
-          <div className="absolute inset-0 bg-barber-stripes pointer-events-none" />
-          <div className="absolute inset-0 opacity-[0.04] pointer-events-none hidden lg:block">
-            <BarberChair className="absolute w-16 -top-4 right-[15%] text-white animate-float" style={{ animationDelay: "-2s" }} />
-            <Comb className="absolute w-24 bottom-[15%] right-[8%] text-white animate-drift" style={{ animationDelay: "-3s" }} />
-            <StraightRazor className="absolute w-14 bottom-[30%] left-[3%] text-white animate-sway" style={{ animationDelay: "-2.5s" }} />
+        {/* ===== HERO BANNER ===== */}
+        <section ref={heroRef} className="relative h-[90vh] min-h-[600px] max-h-[900px] overflow-hidden">
+          <div className="absolute inset-0 bg-barber-stripes pointer-events-none z-10" />
+          <div className="absolute inset-0 z-20 bg-gradient-to-r from-zinc-950/90 via-zinc-950/60 to-zinc-950/40" />
+          <div className="absolute inset-0 z-20 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
+          <img
+            src="https://unsplash.com/photos/41HCQN43PwU/download?force=true&w=1600"
+            alt="Barbearia"
+            className="gsap-parallax absolute inset-0 w-full h-[120%] object-cover -top-[10%]"
+          />
+          <div className="absolute top-6 left-6 z-30 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
+              <ScissorsIcon className="size-5 text-primary-foreground" />
+            </div>
+            <div>
+              <span className="text-lg font-bold text-white">Barber</span>
+              <span className="text-lg font-bold text-primary">Plan</span>
+            </div>
           </div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="gsap-hero inline-flex items-center gap-2 bg-zinc-800 rounded-full px-3 py-1 text-xs font-medium text-zinc-400 mb-6">
-                  <ScissorsIcon className="size-3 text-zinc-400" />
+          <div className="absolute inset-0 z-30 flex items-center">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
+              <div className="max-w-2xl">
+                <div className="gsap-hero inline-flex items-center gap-2 bg-zinc-900/80 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-zinc-400 mb-6 border border-zinc-800">
+                  <ScissorsIcon className="size-3 text-primary" />
                   Sistema completo para barbearias
                 </div>
-                <h1 className="gsap-hero text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.05] tracking-tight">
+                <h1 className="gsap-hero text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-[1.05] tracking-tight">
                   Gestão inteligente para sua{" "}
                   <span className="text-primary">barbearia</span>
                 </h1>
-                <p className="gsap-hero mt-5 text-lg text-zinc-400 max-w-xl leading-relaxed">
+                <p className="gsap-hero mt-5 text-lg sm:text-xl text-zinc-300 max-w-xl leading-relaxed">
                   Agendamento online, gestão de clientes, controle financeiro e
                   lembretes via WhatsApp. Sua barbearia no piloto automático.
                 </p>
-                <div className="gsap-hero mt-6 flex flex-col sm:flex-row gap-3">
+                <div className="gsap-hero mt-8 flex flex-col sm:flex-row gap-3">
                   <Link
                     href="#planos"
-                    className="bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2"
+                    className="bg-primary text-primary-foreground font-semibold px-7 py-3.5 rounded-lg hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 text-base"
                   >
                     Ver Planos e Preços
                     <ArrowRight className="size-4" />
                   </Link>
                   <Link
                     href="#funcionalidades"
-                    className="border border-zinc-700 text-zinc-300 font-semibold px-6 py-3 rounded-lg hover:bg-zinc-800 transition-colors inline-flex items-center justify-center gap-2"
+                    className="border border-zinc-600 text-zinc-300 font-semibold px-7 py-3.5 rounded-lg hover:bg-zinc-800 transition-colors inline-flex items-center justify-center gap-2 text-base"
                   >
                     Funcionalidades
                     <ChevronRight className="size-4" />
                   </Link>
                 </div>
               </div>
-              <div className="relative hidden lg:flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-3xl" />
-                <div className="relative w-full max-w-md aspect-[4/5] rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl">
-                  <img
-                    src="https://unsplash.com/photos/41HCQN43PwU/download?force=true&w=800"
-                    alt="Barbearia"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/90 flex items-center justify-center shadow-lg">
-                      <ScissorsIcon className="size-5 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white">BarberPlan</p>
-                      <p className="text-[11px] text-zinc-400">Gestão inteligente</p>
-                    </div>
-                  </div>
-                </div>
-                <BarberPole className="absolute -bottom-5 -right-5 h-28 w-auto text-primary/25 animate-spin-slow" />
-              </div>
             </div>
+          </div>
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 animate-bounce">
+            <svg className="w-6 h-6 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
           </div>
         </section>
 
