@@ -1,5 +1,30 @@
 # BarberPlan — Memória do Projeto
 
+## Estado Atual (última atualização: Jul 2026)
+
+### Done
+- JWT httpOnly cookie auth (saas_token) — login/signup/logout com API routes, server-verified
+- `requireOwner()` e `requireSuperAdmin()` guards para API routes
+- Proteção JWT em todas API routes de admin (barbers, services, appointments, working-hours, tenants)
+- Super Admin Panel com login JWT, listagem de tenants e delete com cascade transaction
+- Working hours feature: default hours auto-criadas, editor per-day com toggle e time inputs
+- Checkout/financeiro: create-payment cria tenant com slug automático, webhook lê JSON externalReference
+- Financeiro page com dados reais (sem fake data), removida seção de comissão
+- Landing page "Acessar" conditional no plano do usuário
+- Página pública `/[tenant]` redesenhada estilo **Baker Street**:
+  - Top bar (endereço + tel + redes), nav sticky, hero split 50/50 com foto default
+  - Seções: serviços (cards por categoria), equipe, horários, contato, footer limpo
+  - Foto hero: se barbearia tem logo → mostra logo, senão → foto Unsplash (Redd Francisco)
+- "Clientes" removido da sidebar da barbearia (só super admin vê)
+
+### In Progress
+- (none)
+
+### Blocked
+- `POST /api/tenants` não existe — `/admin/cadastro` quebrado
+
+---
+
 ## Identidade
 - **O que é:** Micro SAAS de gestão para barbearias (agendamento online + admin + multi-tenant)
 - **Stack:** Next.js 16.2.9 (App Router + Turbopack) · Prisma 7.8 · PostgreSQL (Supabase) · Tailwind v4 · shadcn/ui
@@ -101,12 +126,17 @@ SaasUser ─→ Tenant (opcional)
 - Steps numerados (01-05), grid cards, FAQ accordion, planos com CTA para `/checkout`
 - Botão "SaasLogin" no header (modal portal para criar/entrar)
 
-### Vitrine `[tenant]/page.tsx` — Figaro Barbearia style
-- Hero escuro "Os melhores serviços em barbearia" com logos SVG animados
-- Serviços em cards de categoria com ícones (Scissors,User,Sparkles etc.)
-- Cards de barbeiros com iniciais em círculo
-- Horários de funcionamento e seção de contato com ícones
-- CustomerStatus component (mostra login do cliente no header)
+### Vitrine `[tenant]/page.tsx` — Baker Street style
+- Top bar com endereço + telefone + ícones sociais
+- Nav sticky com logo, links (SERVIÇOS, HORÁRIOS, EQUIPE, LOCALIZAÇÃO) e CTA "AGENDAR HORÁRIO"
+- Hero split 50/50: texto à esquerda "O estilo que você merece pertinho de você", foto/logo à direita
+- Se serviços: cards por categoria com ícones temáticos (ScissorsIcon, Comb, BarberPole, etc.)
+- Se barbeiros: cards com iniciais em círculo e nome
+- Horários de funcionamento em tabela compacta (aberto/fechado com badge verde/cinza)
+- Contato: grid 2 colunas com endereço, telefone, WhatsApp, Instagram
+- Footer: logo + nome + redes + telefone + copyright
+- Ícones decorativos flutuantes (BarberChair, BarberPole, Mustache, StraightRazor)
+- **Hero image:** se `tenant.logo` existe → mostra logo; senão → foto Unsplash default (Redd Francisco)
 
 ### Booking `[tenant]/agendar/page.tsx`
 - Step 0: login do cliente (nome + WhatsApp, salvo em localStorage como `customer_{tenantSlug}`)
@@ -181,9 +211,11 @@ SaasUser ─→ Tenant (opcional)
 - `POST /api/asaas/webhook` — recebe confirmação, parseia externalReference (JSON com userId/plan/billing), ativa plano com expiry correto
 
 ### Sessão
-- **SAAS:** `saas_user` + `saas_tenant` no localStorage
+- **SAAS (admin):** JWT em httpOnly cookie `saas_token` — server-verified em toda API route
+- **Super admin:** Bearer JWT em localStorage (`super_admin_token`)
 - **Cliente (customer):** `customer_{tenantSlug}` no localStorage
-- `SaasUserContext` + `useSaasUser()` hook (src/contexts/saas-user.tsx)
+- `SaasUserContext` + `useSaasUser()` hook (src/contexts/saas-user.tsx) — fetch user via `/api/auth/saas/me`
+- API routes protegidas com `requireOwner(tenantId)` e `requireSuperAdmin()` (src/lib/api-auth.ts)
 
 ---
 
@@ -327,6 +359,81 @@ git add -A; git commit -m "..."; git push origin main
 vercel deploy --prod          # Deploy na Vercel
 vercel env add NOME prod      # Adicionar variável de ambiente
 ```
+
+## Histórico de Commits / Linha do Tempo
+
+### Commit 00c4624 — "feat: add Unsplash hero image as default, fallback to tenant logo"
+- Hero da página pública agora mostra foto do Unsplash (Redd Francisco — cadeira + espelho) quando não há logo
+- Se dono fizer upload do logo nas configs, substitui automaticamente
+- Constante `HERO_DEFAULT_IMAGE` no topo do arquivo
+
+### Commit 9cbddb4 — "feat: redesign tenant public page with Baker Street layout"
+- Redesign completo da vitrine pública inspirado em bakerstreetbarbearia.com.br
+- Top bar: endereço + telefone + Instagram/WhatsApp
+- Nav sticky com links em MAIÚSCULO (SERVIÇOS, HORÁRIOS, EQUIPE, LOCALIZAÇÃO) + CTA "AGENDAR HORÁRIO"
+- Hero split 50/50 com texto à esquerda e visual (logo ou placeholder) à direita
+- Seções curtas separadas por bigode decorativo
+- Serviços em cards por categoria com ícones SVG temáticos
+- Barbeiros em cards com iniciais, horários em tabela compacta
+- Footer limpo com logo, nome, redes e copyright
+- Ícones decorativos flutuantes com animações CSS (float, sway, spin-slow, drift)
+
+### Commit 645ee00 — "feat: super admin delete tenant with confirmation dialog"
+- DELETE `/api/super-admin/tenants/[id]` com cascade transaction
+- Confirmação visual (dialog) antes de deletar
+
+### Commit 097000a — "feat: JWT httpOnly cookie auth for saas users, protected API routes"
+- `src/lib/auth-saas.ts`: JWT sign/verify, cookie helpers
+- `src/lib/api-auth.ts`: `requireOwner(tenantId)` e `requireSuperAdmin()` guards
+- Routes: `/api/auth/saas/login`, `/signup`, `/logout`, `/me`
+- `SaasUserProvider` agora busca user de `/api/auth/saas/me` (server-verified)
+- `SaasLogin` component chama API de login/signup
+- **Todas** API routes de admin protegidas com JWT + tenant ownership check (401/403)
+- Logout do admin layout usa context `logout()` que chama API e limpa cookie
+
+### Commit a9ec77e — "fix: remove clientes from barbershop sidebar, real data on financeiro, remove comissao"
+- "Clientes" removido da sidebar da barbearia (só super admin)
+- Financeiro com dados reais de appointments (sem nomes/valores falsos)
+- Seção de comissão removida do financeiro
+
+### Commit 9a44496 — "feat: working hours admin page, api, and auto-create on tenant creation"
+- `src/lib/working-hours.ts` com `createDefaultWorkingHours(tenantId)`
+- `GET/PUT /api/working-hours` (PUT protegido)
+- Página `/[tenant]/admin/horarios` com toggle por dia + inputs de horário
+- "Horários" adicionado à sidebar do admin
+- Default hours (Seg-Sex 09-19, Sáb 09-17, Dom fechado) auto-criadas na criação do tenant
+- `purchase/route.ts` e `create-payment/route.ts` chamam `createDefaultWorkingHours`
+
+### Commit 9e5f6c0 (aproximado) — "fix: admin redirect order, auto-suggest slug on setup"
+- Ordem de redirect: `/admin/setup` e `/admin/cadastro` verificados primeiro
+- Setup auto-sugere slug do nome da barbearia; edições manuais desativam auto-suggest
+- Setup salva slug no localStorage após PATCH
+
+### Commit 5d8e3f2 (aproximado) — "feat: checkout creates tenant, webhook reads JSON externalReference"
+- `create-payment` cria tenant (slug de name+surname), retorna `tenantSlug`
+- `externalReference` mudou para JSON `{userId, plan, billing}`
+- Webhook parseia externalReference, seta plan + expiry corretos (1 mês mensal, 1 ano anual)
+- Checkout armazena tenantSlug no localStorage ao gerar Pix
+
+### Commits iniciais — "feat: super admin panel, JWT login, tenant list"
+- Rotas `/super-admin` e `/super-admin/login`
+- JWT-based auth com `jsonwebtoken`
+- API: login, me, list tenants
+- Dashboard com cards de resumo + tabela completa
+- Schema: `Tenant.domain`, `SaasUser.role`
+- Arquivos: `src/lib/auth.ts`, `src/contexts/super-admin.tsx`
+
+### Commits iniciais — Estrutura base do projeto
+- Next.js 16 + App Router + Prisma + Supabase + Tailwind v4
+- Landing page Devskin-inspired
+- Booking flow 5 steps (login → serviço → barbeiro → data/hora → confirmar)
+- Admin panel completo (dashboard, agendamentos, serviços, barbeiros, configurações)
+- Checkout com trial grátis e Pix via Asaas
+- Setup pós-compra com slug personalizado
+- Meus agendamentos para cliente
+- Middleware de subdomínio
+
+---
 
 ## Arquivos Ignorados
 - `.env` — contém DATABASE_URL (supabase)
