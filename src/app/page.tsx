@@ -317,7 +317,7 @@ function HomeContent() {
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-3xl" />
                 <div className="relative w-full max-w-md aspect-[4/5] rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl">
                   <img
-                    src="https://images.unsplash.com/photo-1599351431202-1e0f5e07b3f1?w=800&q=80"
+                    src="https://unsplash.com/photos/41HCQN43PwU/download?force=true&w=800"
                     alt="Barbearia"
                     className="w-full h-full object-cover"
                   />
