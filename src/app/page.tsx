@@ -236,11 +236,13 @@ function HomeContent() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between relative z-10">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground relative overflow-hidden">
-              B
-              <ScissorsIcon className="absolute -bottom-1 -right-1 w-3 text-primary-foreground/30" />
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center relative overflow-hidden shadow-lg shadow-primary/25">
+              <ScissorsIcon className="size-4.5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold text-white">BarberPlan</span>
+            <div>
+              <span className="text-lg font-bold text-white">Barber</span>
+              <span className="text-lg font-bold text-primary">Plan</span>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <SaasLogin />
@@ -273,9 +275,9 @@ function HomeContent() {
       <main>
         {/* ===== HERO ===== */}
         <section ref={heroRef} className="overflow-hidden relative bg-zinc-950">
-          <div className="absolute inset-0 opacity-[0.05] pointer-events-none hidden lg:block">
+          <div className="absolute inset-0 bg-barber-stripes pointer-events-none" />
+          <div className="absolute inset-0 opacity-[0.04] pointer-events-none hidden lg:block">
             <BarberChair className="absolute w-16 -top-4 right-[15%] text-white animate-float" style={{ animationDelay: "-2s" }} />
-            <Mustache className="absolute w-20 top-[20%] left-[5%] text-white animate-sway" style={{ animationDelay: "-1s" }} />
             <Comb className="absolute w-24 bottom-[15%] right-[8%] text-white animate-drift" style={{ animationDelay: "-3s" }} />
             <StraightRazor className="absolute w-14 bottom-[30%] left-[3%] text-white animate-sway" style={{ animationDelay: "-2.5s" }} />
           </div>
@@ -313,18 +315,24 @@ function HomeContent() {
               </div>
               <div className="relative hidden lg:flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent rounded-full blur-3xl" />
-                <div className="relative flex items-center gap-8 p-8 rounded-2xl border border-zinc-800 bg-zinc-900">
-                  <BarberChair className="w-36 h-auto" />
-                  <div className="flex flex-col items-center gap-5">
-                  <BarberPole className="h-44 w-auto animate-spin-slow" />
-                  <Comb className="w-28 h-auto animate-float" style={{ animationDelay: "-1s" }} />
-                  <Mustache className="w-24 h-auto animate-sway" style={{ animationDelay: "-2s" }} />
-                  </div>
-                  <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                    <ScissorsIcon className="size-8 text-primary" />
+                <div className="relative w-full max-w-md aspect-[4/5] rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl">
+                  <img
+                    src="https://images.unsplash.com/photo-1599351431202-1e0f5e07b3f1?w=800&q=80"
+                    alt="Barbearia"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/90 flex items-center justify-center shadow-lg">
+                      <ScissorsIcon className="size-5 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">BarberPlan</p>
+                      <p className="text-[11px] text-zinc-400">Gestão inteligente</p>
+                    </div>
                   </div>
                 </div>
-                <ShavingBrush className="absolute w-8 -top-3 -right-3 text-white/20 animate-float" style={{ animationDelay: "-3.5s" }} />
+                <BarberPole className="absolute -bottom-5 -right-5 h-28 w-auto text-primary/25 animate-spin-slow" />
               </div>
             </div>
           </div>
@@ -703,11 +711,10 @@ function HomeContent() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500 relative z-10">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-zinc-800 flex items-center justify-center text-xs font-bold text-white relative overflow-hidden">
-              B
-              <ScissorsIcon className="absolute -bottom-1 -right-1 w-2 text-white/30" />
+            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
+              <ScissorsIcon className="size-3 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-white">BarberPlan</span>
+            <span className="font-semibold text-white">Barber<span className="text-primary">Plan</span></span>
           </div>
           <p>&copy; 2026 BarberPlan. Todos os direitos reservados.</p>
         </div>
