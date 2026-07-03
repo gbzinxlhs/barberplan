@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendWhatsApp, formatDateTime } from "@/lib/whatsapp";
 
 export async function POST(request: Request) {
   try {
@@ -51,6 +52,49 @@ export async function POST(request: Request) {
         customerId: customer.id,
       },
     });
+
+    const [service, barber] = await Promise.all([
+      prisma.service.findUnique({ where: { id: serviceId } }),
+      prisma.barber.findUnique({ where: { id: barberId } }),
+    ]);
+
+    const dateStr = formatDateTime(new Date(startTime));
+    const methodLabel =
+      paymentMethod === "pix" ? "Pix"
+      : paymentMethod === "dinheiro" ? "Dinheiro"
+      : paymentMethod === "cartao" ? "Cartão"
+      : "a confirmar";
+
+    const customerMsg = [
+      `✅ *Agendamento Confirmado!*`,
+      ``,
+      `🪒 *${tenant.name}*`,
+      `👤 Barbeiro: ${barber?.name || "—"}`,
+      `💇 Serviço: ${service?.name || "—"}`,
+      `💰 Valor: R$ ${(service?.price ?? 0).toFixed(2)}`,
+      `📅 Data: ${dateStr}`,
+      `💳 Pagamento: ${methodLabel}`,
+      ``,
+      `Nos vemos lá! 🫱🏻‍🫲🏾`,
+    ].join("\n");
+
+    sendWhatsApp(customer.phone, customerMsg);
+
+    const barberShopPhone = tenant.whatsapp || tenant.phone;
+    if (barberShopPhone) {
+      const barberMsg = [
+        `📅 *Novo Agendamento!*`,
+        ``,
+        `👤 Cliente: ${customer.name}`,
+        `📞 Telefone: ${customer.phone}`,
+        `💇 Serviço: ${service?.name || "—"}`,
+        `👤 Barbeiro: ${barber?.name || "—"}`,
+        `📅 Data: ${dateStr}`,
+        `💳 Pagamento: ${methodLabel}`,
+      ].join("\n");
+
+      sendWhatsApp(barberShopPhone, barberMsg);
+    }
 
     return NextResponse.json({ appointment, customer }, { status: 201 });
   } catch (error) {

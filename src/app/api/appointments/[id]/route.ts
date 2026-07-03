@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth-saas";
+import { sendWhatsApp, formatDateTime } from "@/lib/whatsapp";
 
 export async function PATCH(
   request: Request,
@@ -12,7 +13,10 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const existing = await prisma.appointment.findUnique({ where: { id } });
+  const existing = await prisma.appointment.findUnique({
+    where: { id },
+    include: { service: true, barber: true, customer: true, tenant: true },
+  });
   if (!existing) return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
 
   if (auth.user.tenantId !== existing.tenantId) {
@@ -24,6 +28,27 @@ export async function PATCH(
     where: { id },
     data: { status: body.status },
   });
+
+  const statusLabels: Record<string, string> = {
+    confirmed: "confirmado ✅",
+    cancelled: "cancelado ❌",
+    completed: "finalizado ✅",
+    pending: "pendente ⏳",
+  };
+
+  const label = statusLabels[body.status] || body.status;
+  const dateStr = formatDateTime(existing.startTime);
+
+  const msg = [
+    `🪒 *${existing.tenant.name}*`,
+    `Seu agendamento foi *${label}*!`,
+    ``,
+    `💇 Serviço: ${existing.service?.name || "—"}`,
+    `👤 Barbeiro: ${existing.barber?.name || "—"}`,
+    `📅 Data: ${dateStr}`,
+  ].join("\n");
+
+  sendWhatsApp(existing.customer.phone, msg);
 
   return NextResponse.json({ appointment });
 }
