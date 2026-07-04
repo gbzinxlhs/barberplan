@@ -4,6 +4,14 @@
 
 ### Done
 - **Logo BarberPlan** — Imagem `logo-barber-plan.png` adicionada ao `public/`, exibida em 4 locais usando `next/image` (header landing, footer landing, sidebar admin, sidebar super-admin)
+- **NFS-e via GerandoNotaFacil** — Integração completa para emissão de Nota Fiscal de Serviço Eletrônica no plano Pro:
+  - Checkout: checkbox "Incluir emissão de NFS-e" para plano Pro
+  - Setup: seção de configuração fiscal (CNPJ, inscrição municipal, certificado A1, regime tributário)
+  - Agendamentos: botão "NFS-e" para agendamentos finalizados
+  - Financeiro: tabela de notas fiscais emitidas
+  - APIs: `/api/nfse/cadastrar-empresa`, `/api/nfse/emitir`, `/api/nfse/historico`
+  - Lib: `src/lib/gerando-nota-facil.ts` (integração API) + `src/lib/crypto.ts` (encriptação certificado)
+  - Schema: campos `nfse*` no Tenant + `nfseId/nfseNumero/nfsePdfUrl` no Appointment + `nfseSelected` no SaasUser
 - **Cron job `/api/cron/appointments`** — auto-completa, auto-cancela no-show (30min), auto-cancela pending (15min), envia lembretes WhatsApp 1h antes (protegido por CRON_SECRET)
 - **WhatsApp notifications** via Twilio (apenas plano Pro):
   - Confirmação pro cliente + aviso na barbearia ao criar agendamento
@@ -73,6 +81,9 @@
 /api/appointments/[id]         → PATCH (status) / DELETE
 /api/tenants/[slug]         → GET (tenant + services + barbers + workingHours) / PATCH (atualizar)
 /api/tenants/check-slug     → GET (verifica disponibilidade de slug)
+/api/nfse/cadastrar-empresa → POST (cadastra empresa + certificado no GerandoNotaFacil — autenticada)
+/api/nfse/emitir            → POST (emite NFS-e para agendamento — autenticada)
+/api/nfse/historico         → GET (lista notas emitidas do tenant — autenticada)
 /api/services                  → GET (por tenant) / POST (criar)
 /api/services/[id]             → PATCH / DELETE
 /api/barbers                   → GET (por tenant) / POST (criar)
@@ -494,6 +505,22 @@ vercel env add NOME prod      # Adicionar variável de ambiente
 - Setup pós-compra com slug personalizado
 - Meus agendamentos para cliente
 - Middleware de subdomínio
+
+### Commit 8b60cee — "fix: type error tenantId null check"
+- Corrigido type error nos endpoints NFS-e quando tenantId é null
+
+### Commit 6705c33 — "feat: integração NFS-e via GerandoNotaFacil - checkout, setup, agendamentos, financeiro"
+- Schema Prisma: campos `nfse*` no Tenant, `nfseId/nfseNumero/nfsePdfUrl` no Appointment, `nfseSelected` no SaasUser
+- Lib `crypto.ts`: encriptação AES-256-CBC para certificado A1
+- Lib `gerando-nota-facil.ts`: integração com API GerandoNotaFacil (cadastrar empresa, certificado, emitir, listar)
+- API `nfse/cadastrar-empresa`: cadastra empresa e certificado no GerandoNotaFacil
+- API `nfse/emitir`: emite NFS-e para agendamento finalizado
+- API `nfse/historico`: lista notas emitidas do tenant
+- Checkout: checkbox "Incluir NFS-e" para plano Pro
+- Purchase: salva `nfseSelected` no SaasUser
+- Setup: seção NFS-e com CNPJ, inscrição municipal, upload certificado A1, regime tributário
+- Agendamentos: botão "NFS-e" para status `completed`, badge com número da nota
+- Financeiro: tabela "Notas Fiscais Emitidas" com PDF link
 
 ### Commit 9d3e0b0 — "Usar next/image para logo com otimização"
 - Logo `logo-barber-plan.png` copiada para `public/`
