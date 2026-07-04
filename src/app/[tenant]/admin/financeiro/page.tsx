@@ -29,6 +29,7 @@ export default function TenantAdminFinancial() {
   const tenantSlug = params.tenant as string;
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [nfseNotas, setNfseNotas] = useState<any[]>([]);
 
   useEffect(() => {
     if (!tenantSlug) return;
@@ -39,6 +40,10 @@ export default function TenantAdminFinancial() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+    fetch("/api/nfse/historico")
+      .then((r) => r.json())
+      .then((data) => setNfseNotas(data.notas || []))
+      .catch(() => {});
   }, [tenantSlug]);
 
   if (loading) {
@@ -177,6 +182,47 @@ export default function TenantAdminFinancial() {
               )}
             </div>
           </div>
+
+          {nfseNotas.length > 0 && (
+            <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-zinc-900">Notas Fiscais Emitidas (NFS-e)</h2>
+                <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-medium">{nfseNotas.length} nota{nfseNotas.length !== 1 ? "s" : ""}</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-zinc-100 bg-zinc-50">
+                      <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Data</th>
+                      <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Cliente</th>
+                      <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Serviço</th>
+                      <th className="text-left px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Nº NFS-e</th>
+                      <th className="text-right px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">Valor</th>
+                      <th className="text-center px-5 py-3.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">PDF</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {nfseNotas.map((nota, i) => (
+                      <tr key={i} className="border-b border-zinc-50 hover:bg-zinc-50 transition-colors">
+                        <td className="px-5 py-3.5 text-sm text-zinc-500">{format(new Date(nota.data), "dd/MM/yyyy")}</td>
+                        <td className="px-5 py-3.5 text-sm font-medium text-zinc-900">{nota.cliente}</td>
+                        <td className="px-5 py-3.5 text-sm text-zinc-500">{nota.servico}</td>
+                        <td className="px-5 py-3.5 text-sm text-violet-600 font-medium">{nota.numero || "—"}</td>
+                        <td className="px-5 py-3.5 text-sm text-right font-semibold text-zinc-900">{formatCurrency(nota.valor)}</td>
+                        <td className="px-5 py-3.5 text-center">
+                          {nota.pdfUrl ? (
+                            <a href={nota.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">Abrir</a>
+                          ) : (
+                            <span className="text-xs text-zinc-400">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </>
       )}
 

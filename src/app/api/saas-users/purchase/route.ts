@@ -15,7 +15,7 @@ function generateSlug(name: string, surname: string): string {
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { email, plan, billing } = body;
+  const { email, plan, billing, nfseSelected } = body;
 
   if (!email || !plan) {
     return NextResponse.json({ error: "Email e plano são obrigatórios" }, { status: 400 });
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
 
     const updated = await prisma.saasUser.update({
       where: { email },
-      data: { plan: "starter_trial", planExpiresAt, tenantId },
+      data: { plan: "starter_trial", planExpiresAt, tenantId, nfseSelected: false },
     });
 
     const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
 
   const updated = await prisma.saasUser.update({
     where: { email },
-    data: { plan, planExpiresAt, tenantId },
+    data: { plan, planExpiresAt, tenantId, nfseSelected: !!nfseSelected && plan === "pro" },
   });
 
   const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });

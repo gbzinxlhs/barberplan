@@ -21,6 +21,17 @@ model Tenant {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // NFS-e
+  nfseEnabled            Boolean  @default(false)
+  nfseCnpj               String?
+  nfseInscricaoMunicipal String?
+  nfseCertificadoA1      String?
+  nfseCertificadoSenha   String?
+  nfseRegimeTributario   String?
+  nfseToken              String?
+  nfseServiceCode        String?  @default("17.02")
+  nfseEmpresaId          String?
+
   users         User[]
   services      Service[]
   barbers       Barber[]
@@ -99,6 +110,9 @@ model Appointment {
   status         String   @default("pending")
   paymentMethod  String?
   notes          String?
+  nfseId         String?
+  nfseNumero     String?
+  nfsePdfUrl     String?
   tenantId       String
   tenant         Tenant   @relation(fields: [tenantId], references: [id])
   barberId       String
@@ -160,6 +174,7 @@ model SaasUser {
   phone      String
   plan       String    @default("free")
   planExpiresAt DateTime?
+  nfseSelected Boolean  @default(false)
   role       String    @default("user")
   tenantId   String?
   tenant     Tenant?   @relation(fields: [tenantId], references: [id])

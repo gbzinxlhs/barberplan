@@ -33,6 +33,7 @@ export default function CheckoutContent() {
   const [pixLoading, setPixLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cpfCnpj, setCpfCnpj] = useState("");
+  const [nfseSelected, setNfseSelected] = useState(false);
 
   const plan = plans[planSlug];
   const price = !isTrial ? (billing === "monthly" ? plan.monthly : plan.annual) : 0;
@@ -68,7 +69,7 @@ export default function CheckoutContent() {
       const res = await fetch("/api/asaas/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email, plan: planSlug, billing, cpfCnpj }),
+        body: JSON.stringify({ email: user.email, plan: planSlug, billing, cpfCnpj, nfseSelected: nfseSelected && planSlug === "pro" }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); return; }
@@ -92,7 +93,7 @@ export default function CheckoutContent() {
       const res = await fetch("/api/saas-users/purchase", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email, plan: planSlug, billing }),
+        body: JSON.stringify({ email: user.email, plan: planSlug, billing, nfseSelected: nfseSelected && planSlug === "pro" }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); return; }
@@ -287,6 +288,23 @@ export default function CheckoutContent() {
                     className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40"
                     placeholder="000.000.000-00"
                   />
+                </div>
+              )}
+
+              {planSlug === "pro" && !isTrial && !pixData && (
+                <div className="py-3 border-b border-zinc-800">
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={nfseSelected}
+                      onChange={(e) => setNfseSelected(e.target.checked)}
+                      className="mt-0.5 size-4 rounded border-zinc-600 bg-zinc-800 text-primary focus:ring-primary/40"
+                    />
+                    <div>
+                      <span className="text-sm text-zinc-200 font-medium group-hover:text-white transition-colors">Incluir emissão de NFS-e</span>
+                      <p className="text-xs text-zinc-500 mt-0.5">Emita notas fiscais de serviço automaticamente. Configure depois no painel.</p>
+                    </div>
+                  </label>
                 </div>
               )}
 

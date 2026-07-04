@@ -30,6 +30,14 @@ export default function SetupContent() {
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const slugManuallyEdited = useRef(false);
+  const [hasNfse, setHasNfse] = useState(false);
+  const [nfseCnpj, setNfseCnpj] = useState("");
+  const [nfseInscricaoMunicipal, setNfseInscricaoMunicipal] = useState("");
+  const [nfseCertificadoFile, setNfseCertificadoFile] = useState("");
+  const [nfseCertificadoSenha, setNfseCertificadoSenha] = useState("");
+  const [nfseRegimeTributario, setNfseRegimeTributario] = useState("simples_nacional");
+  const [nfseServiceCode, setNfseServiceCode] = useState("17.02");
+  const [nfseSaving, setNfseSaving] = useState(false);
 
   useEffect(() => {
     if (!slug) { router.push("/"); return; }
@@ -40,6 +48,13 @@ export default function SetupContent() {
         setStoreName(t.name || "");
         setStoreSlug(t.slug || slug);
         setTenantId(t.id || "");
+      } catch {}
+    }
+    const userStr = localStorage.getItem("saas_user");
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        setHasNfse(u.nfseSelected === true);
       } catch {}
     }
   }, [slug, router]);
@@ -110,6 +125,37 @@ export default function SetupContent() {
 
     setSaving(false);
     setDone(true);
+  }
+
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(",")[1];
+      setNfseCertificadoFile(base64);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function handleNfseSave() {
+    if (!slug || !nfseCnpj || !nfseInscricaoMunicipal || !nfseCertificadoFile || !nfseCertificadoSenha) return;
+    setNfseSaving(true);
+    try {
+      await fetch("/api/nfse/cadastrar-empresa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cnpj: nfseCnpj,
+          inscricaoMunicipal: nfseInscricaoMunicipal,
+          certificadoBase64: nfseCertificadoFile,
+          certificadoSenha: nfseCertificadoSenha,
+          regimeTributario: nfseRegimeTributario,
+          serviceCode: nfseServiceCode,
+        }),
+      });
+    } catch {}
+    setNfseSaving(false);
   }
 
   if (done) {
@@ -232,6 +278,89 @@ export default function SetupContent() {
               placeholder="@minhabarbearia"
             />
           </div>
+
+          {hasNfse && (
+            <div className="border-t border-zinc-200 pt-4 mt-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-6 h-6 rounded bg-violet-100 flex items-center justify-center">
+                  <span className="text-xs font-bold text-violet-600">NF</span>
+                </div>
+                <h3 className="text-sm font-semibold text-zinc-900">Nota Fiscal de Serviço (NFS-e)</h3>
+              </div>
+              <p className="text-xs text-zinc-500 mb-4">Preencha os dados para emitir notas fiscais automaticamente.</p>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500 mb-1">CNPJ</label>
+                  <input
+                    value={nfseCnpj}
+                    onChange={(e) => setNfseCnpj(e.target.value)}
+                    className="w-full border border-zinc-300 rounded-lg px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
+                    placeholder="00.000.000/0001-00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500 mb-1">Inscrição Municipal</label>
+                  <input
+                    value={nfseInscricaoMunicipal}
+                    onChange={(e) => setNfseInscricaoMunicipal(e.target.value)}
+                    className="w-full border border-zinc-300 rounded-lg px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
+                    placeholder="Número da inscrição"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500 mb-1">Certificado Digital A1</label>
+                  <input
+                    type="file"
+                    accept=".pfx,.p12"
+                    onChange={handleFileUpload}
+                    className="w-full border border-zinc-300 rounded-lg px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200"
+                  />
+                  {nfseCertificadoFile && <p className="text-xs text-emerald-600 mt-1">Certificado carregado</p>}
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500 mb-1">Senha do Certificado</label>
+                  <input
+                    type="password"
+                    value={nfseCertificadoSenha}
+                    onChange={(e) => setNfseCertificadoSenha(e.target.value)}
+                    className="w-full border border-zinc-300 rounded-lg px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
+                    placeholder="Senha do certificado A1"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Regime Tributário</label>
+                    <select
+                      value={nfseRegimeTributario}
+                      onChange={(e) => setNfseRegimeTributario(e.target.value)}
+                      className="w-full border border-zinc-300 rounded-lg px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
+                    >
+                      <option value="simples_nacional">Simples Nacional</option>
+                      <option value="lucro_presumido">Lucro Presumido</option>
+                      <option value="lucro_real">Lucro Real</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Código do Serviço</label>
+                    <input
+                      value={nfseServiceCode}
+                      onChange={(e) => setNfseServiceCode(e.target.value)}
+                      className="w-full border border-zinc-300 rounded-lg px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
+                      placeholder="17.02"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={handleNfseSave}
+                  disabled={nfseSaving || !nfseCnpj || !nfseInscricaoMunicipal || !nfseCertificadoFile || !nfseCertificadoSenha}
+                  className="w-full bg-violet-600 text-white font-semibold py-2.5 rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 text-sm"
+                >
+                  {nfseSaving ? "Configurando NFS-e..." : "Salvar Configuração NFS-e"}
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="pt-2">
             <button

@@ -13,6 +13,7 @@ import {
   Scissors,
   User,
   RefreshCw,
+  FileText,
 } from "lucide-react";
 import { BarberPole, Mustache } from "@/components/barber-icons";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export default function TenantAdminAppointments() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [nfseEmitting, setNfseEmitting] = useState<string | null>(null);
   const pageSize = 20;
 
   async function loadAppointments(p?: number) {
@@ -65,6 +67,19 @@ export default function TenantAdminAppointments() {
       body: JSON.stringify({ status }),
     });
     loadAppointments(page);
+  }
+
+  async function emitirNfse(appointmentId: string) {
+    setNfseEmitting(appointmentId);
+    try {
+      const res = await fetch("/api/nfse/emitir", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appointmentId }),
+      });
+      if (res.ok) loadAppointments(page);
+    } catch {}
+    setNfseEmitting(null);
   }
 
   const confirmed = appointments.filter((a) => a.status === "confirmed").length;
@@ -153,7 +168,7 @@ export default function TenantAdminAppointments() {
                     <span className="sm:hidden text-xs text-zinc-400 italic">{apt.status === "completed" ? "Finalizado" : "Cancelado"}</span>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 pt-1 sm:pt-0 sm:justify-end">
+                <div className="flex items-center gap-1.5 pt-1 sm:pt-0 sm:justify-end flex-wrap">
                   {apt.status === "confirmed" && (
                     <>
                       <Button size="sm" variant="outline" onClick={() => updateStatus(apt.id, "completed")} className="text-xs h-8 border-emerald-200 text-emerald-700 hover:bg-emerald-50 flex-1 sm:flex-none">
@@ -174,8 +189,22 @@ export default function TenantAdminAppointments() {
                       </Button>
                     </>
                   )}
-                  {(apt.status === "completed" || apt.status === "cancelled") && (
-                    <span className="hidden sm:inline text-xs text-zinc-400 px-3 italic">{apt.status === "completed" ? "Finalizado" : "Cancelado"}</span>
+                  {apt.status === "completed" && (
+                    <>
+                      {apt.nfseId ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-violet-600 font-medium px-2 py-1 bg-violet-50 rounded-full border border-violet-200">
+                          <FileText className="size-3" />NF-e {apt.nfseNumero}
+                        </span>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => emitirNfse(apt.id)} disabled={nfseEmitting === apt.id} className="text-xs h-8 border-violet-200 text-violet-700 hover:bg-violet-50 flex-1 sm:flex-none">
+                          <FileText className="size-3.5 mr-1" />{nfseEmitting === apt.id ? "Emitindo..." : "NFS-e"}
+                        </Button>
+                      )}
+                      <span className="hidden sm:inline text-xs text-zinc-400 px-3 italic">Finalizado</span>
+                    </>
+                  )}
+                  {apt.status === "cancelled" && (
+                    <span className="hidden sm:inline text-xs text-zinc-400 px-3 italic">Cancelado</span>
                   )}
                 </div>
               </div>

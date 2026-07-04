@@ -3,6 +3,7 @@
 ## Estado Atual (última atualização: Jul 2026)
 
 ### Done
+- **Logo BarberPlan** — Imagem `logo-barber-plan.png` adicionada ao `public/`, exibida em 4 locais usando `next/image` (header landing, footer landing, sidebar admin, sidebar super-admin)
 - **Cron job `/api/cron/appointments`** — auto-completa, auto-cancela no-show (30min), auto-cancela pending (15min), envia lembretes WhatsApp 1h antes (protegido por CRON_SECRET)
 - **WhatsApp notifications** via Twilio (apenas plano Pro):
   - Confirmação pro cliente + aviso na barbearia ao criar agendamento
@@ -493,6 +494,14 @@ vercel env add NOME prod      # Adicionar variável de ambiente
 - Setup pós-compra com slug personalizado
 - Meus agendamentos para cliente
 - Middleware de subdomínio
+
+### Commit 9d3e0b0 — "Usar next/image para logo com otimização"
+- Logo `logo-barber-plan.png` copiada para `public/`
+- Substituído `<img>` por `<Image>` do next/image em 4 layouts:
+  - Header landing page (`src/app/page.tsx`) — com `priority`
+  - Footer landing page (`src/app/page.tsx`)
+  - Sidebar admin (`src/app/[tenant]/admin/layout.tsx`)
+  - Sidebar super-admin (`src/app/super-admin/layout.tsx`)
 
 ---
 
