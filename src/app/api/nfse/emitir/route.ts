@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "appointmentId é obrigatório" }, { status: 400 });
   }
 
+  if (!auth.user.tenantId) return NextResponse.json({ error: "Tenant não encontrado" }, { status: 404 });
   const tenant = await prisma.tenant.findUnique({ where: { id: auth.user.tenantId } });
   if (!tenant || !tenant.nfseEnabled || !tenant.nfseToken) {
     return NextResponse.json({ error: "NFS-e não configurada" }, { status: 400 });

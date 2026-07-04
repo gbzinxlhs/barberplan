@@ -5,6 +5,7 @@ import { getAuthUser } from "@/lib/auth-saas";
 export async function GET(request: Request) {
   const auth = await getAuthUser();
   if (!auth) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  if (!auth.user.tenantId) return NextResponse.json({ error: "Tenant não encontrado" }, { status: 404 });
 
   const appointments = await prisma.appointment.findMany({
     where: {

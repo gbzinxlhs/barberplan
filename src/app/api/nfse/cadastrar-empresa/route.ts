@@ -15,6 +15,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Todos os campos fiscais são obrigatórios" }, { status: 400 });
   }
 
+  if (!auth.user.tenantId) return NextResponse.json({ error: "Tenant não encontrado" }, { status: 404 });
   const tenant = await prisma.tenant.findUnique({ where: { id: auth.user.tenantId } });
   if (!tenant) return NextResponse.json({ error: "Tenant não encontrado" }, { status: 404 });
 
