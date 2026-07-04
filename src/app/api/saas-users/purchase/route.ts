@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createDefaultWorkingHours } from "@/lib/working-hours";
+import { signSaasToken, setSaasTokenCookie } from "@/lib/auth-saas";
 
 function generateSlug(name: string, surname: string): string {
   const base = `${name}-${surname}`
@@ -62,7 +63,11 @@ export async function POST(request: Request) {
     });
 
     const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
-    return NextResponse.json({ user: updated, tenant });
+
+    const token = signSaasToken({ userId: updated.id, email: updated.email, tenantId: updated.tenantId, role: updated.role });
+    const response = NextResponse.json({ user: updated, tenant });
+    setSaasTokenCookie(response, token);
+    return response;
   }
 
   if (!["monthly", "annual"].includes(billing)) {
@@ -84,5 +89,9 @@ export async function POST(request: Request) {
   });
 
   const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
-  return NextResponse.json({ user: updated, tenant });
+
+  const token = signSaasToken({ userId: updated.id, email: updated.email, tenantId: updated.tenantId, role: updated.role });
+  const response = NextResponse.json({ user: updated, tenant });
+  setSaasTokenCookie(response, token);
+  return response;
 }

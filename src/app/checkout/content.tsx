@@ -42,7 +42,7 @@ export default function CheckoutContent() {
     setLoginError("");
     setLoginSaving(true);
     try {
-      const res = await fetch("/api/saas-users", {
+      const res = await fetch("/api/auth/saas/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(loginForm),

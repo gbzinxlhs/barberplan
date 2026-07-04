@@ -1,0 +1,55 @@
+{
+  "title": "BarberPlan - Demo Video",
+  "fps": 30,
+  "resolution": "1920x1080",
+  "scenes": [
+    {
+      "id": "scene-01",
+      "html": "scenes/scene-01.html",
+      "duration": 5,
+      "narration": "narration/scene-01.txt",
+      "transition": "crossfade",
+      "transitionDuration": 0.3
+    },
+    {
+      "id": "scene-02",
+      "html": "scenes/scene-02.html",
+      "duration": 6,
+      "narration": "narration/scene-02.txt",
+      "transition": "crossfade",
+      "transitionDuration": 0.3
+    },
+    {
+      "id": "scene-03",
+      "html": "scenes/scene-03.html",
+      "duration": 7,
+      "narration": "narration/scene-03.txt",
+      "transition": "crossfade",
+      "transitionDuration": 0.3
+    },
+    {
+      "id": "scene-04",
+      "html": "scenes/scene-04.html",
+      "duration": 9,
+      "narration": "narration/scene-04.txt",
+      "transition": "crossfade",
+      "transitionDuration": 0.3
+    },
+    {
+      "id": "scene-05",
+      "html": "scenes/scene-05.html",
+      "duration": 5,
+      "narration": "narration/scene-05.txt",
+      "transition": "crossfade",
+      "transitionDuration": 0.3
+    },
+    {
+      "id": "scene-06",
+      "html": "scenes/scene-06.html",
+      "duration": 6,
+      "narration": "narration/scene-06.txt",
+      "transition": "crossfade",
+      "transitionDuration": 0.5
+    }
+  ]
+}

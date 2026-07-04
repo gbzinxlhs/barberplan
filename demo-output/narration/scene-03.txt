@@ -1,0 +1,1 @@
+BarberPlan resolve tudo. Seu cliente acessa o link da sua barbearia, escolhe o serviço, seleciona o barbeiro e confirma o horário em três cliques. Sem telefonema. Sem atrito.

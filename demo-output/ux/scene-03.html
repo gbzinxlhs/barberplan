@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Scene 03 - Choose Service</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1920px;height:1080px;background:#09090b;font-family:'Inter',system-ui,sans-serif;overflow:hidden;padding:40px 80px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:0 0 20px 0;border-bottom:1px solid #27272a;margin-bottom:40px}
+.header-left{display:flex;align-items:center;gap:12px}
+.avatar{width:36px;height:36px;border-radius:10px;background:#22c55e;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#09090b}
+.header-name{font-size:18px;font-weight:700;color:#fff}
+.header-right{display:flex;gap:16px}
+.header-right a{color:#71717a;font-size:13px;text-decoration:none}
+.header-right a:hover{color:#fff}
+.steps{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.step{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:#22c55e;color:#09090b}
+.step.inactive{background:#27272a;color:#52525b}
+.step-line{flex:1;height:2px;background:#22c55e;border-radius:1px}
+.step-line.inactive{background:#27272a}
+.title{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.title svg{width:22px;height:22px;color:#22c55e}
+.title h2{font-size:24px;font-weight:700;color:#fff}
+.categories{display:flex;gap:8px;margin-bottom:24px}
+.cat{font-size:13px;font-weight:500;padding:8px 18px;border-radius:999px;border:1px solid #3f3f46;color:#52525b;background:transparent;cursor:pointer}
+.cat.active{background:#22c55e;border-color:#22c55e;color:#09090b}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{border-radius:14px;padding:18px 20px;border:1px solid #27272a;background:#18181b;cursor:pointer;transition:all .15s}
+.card:hover{border-color:#52525b}
+.card.selected{border-color:#22c55e;border-width:2px}
+.card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.card-name{color:#fff;font-weight:600;font-size:16px}
+.card-price{color:#22c55e;font-weight:700;font-size:15px}
+.card-dur{color:#52525b;font-size:13px}
+.user-info{display:flex;align-items:center;gap:10px;padding:16px 0;border-bottom:1px solid #27272a;margin-bottom:24px}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:#27272a;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+.user-name{color:#fff;font-size:14px;font-weight:500}
+.user-phone{color:#52525b;font-size:12px}
+</style></head><body>
+<div class="header">
+  <div class="header-left">
+    <div class="avatar">V</div>
+    <div class="header-name">Vintage Club</div>
+  </div>
+  <div class="header-right">
+    <a href="#">Meus Agendamentos</a>
+    <a href="#">Sair</a>
+  </div>
+</div>
+<div class="user-info">
+  <div class="user-avatar">G</div>
+  <div>
+    <div class="user-name">Gabriel Santos</div>
+    <div class="user-phone">(85) 99999-1234</div>
+  </div>
+</div>
+<div class="steps">
+  <div class="step">1</div>
+  <div class="step-line"></div>
+  <div class="step inactive">2</div>
+  <div class="step-line inactive"></div>
+  <div class="step inactive">3</div>
+  <div class="step-line inactive"></div>
+  <div class="step inactive">4</div>
+  <div class="step-line inactive"></div>
+  <div class="step inactive">5</div>
+</div>
+<div class="title">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3zm0 3c-2.5 0-4.5 1-4.5 3v3h9v-3c0-2-2-3-4.5-3z"/></svg>
+  <h2>Escolha o Serviço</h2>
+</div>
+<div class="categories">
+  <span class="cat active">Todos</span>
+  <span class="cat">Corte</span>
+  <span class="cat">Barba</span>
+  <span class="cat">Combos</span>
+  <span class="cat">Depilação</span>
+  <span class="cat">Cabelo</span>
+</div>
+<div class="grid">
+  <div class="card selected">
+    <div class="card-top">
+      <span class="card-name">Corte Degradê</span>
+      <span class="card-price">R$ 45</span>
+    </div>
+    <div class="card-dur">40 min</div>
+  </div>
+  <div class="card">
+    <div class="card-top">
+      <span class="card-name">Barba Tradicional</span>
+      <span class="card-price">R$ 30</span>
+    </div>
+    <div class="card-dur">20 min</div>
+  </div>
+  <div class="card">
+    <div class="card-top">
+      <span class="card-name">Corte + Barba</span>
+      <span class="card-price">R$ 65</span>
+    </div>
+    <div class="card-dur">60 min</div>
+  </div>
+  <div class="card">
+    <div class="card-top">
+      <span class="card-name">Hidratação</span>
+      <span class="card-price">R$ 50</span>
+    </div>
+    <div class="card-dur">30 min</div>
+  </div>
+  <div class="card">
+    <div class="card-top">
+      <span class="card-name">Depilação (Cera)</span>
+      <span class="card-price">R$ 35</span>
+    </div>
+    <div class="card-dur">15 min</div>
+  </div>
+  <div class="card">
+    <div class="card-top">
+      <span class="card-name">Combo Completo</span>
+      <span class="card-price">R$ 90</span>
+    </div>
+    <div class="card-dur">75 min</div>
+  </div>
+</div>
+</body></html>

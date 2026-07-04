@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Scene 02 - Problem</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1920px; height: 1080px;
+  background: #0d0e12;
+  font-family: 'Inter', sans-serif;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.bg-glow {
+  position: absolute; width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(242,139,130,0.12) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+.content { text-align: center; z-index: 1; }
+.icon-wrap {
+  width: 80px; height: 80px; border-radius: 20px;
+  background: rgba(242,139,130,0.15);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+}
+.icon-wrap svg { width: 40px; height: 40px; color: #f28b82; }
+h1 {
+  font-size: 64px; font-weight: 800; color: #f28b82; line-height: 1.15;
+  margin-bottom: 24px;
+}
+.problems {
+  display: flex; flex-direction: column; gap: 14px; align-items: center;
+}
+.problem-item {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(242,139,130,0.06);
+  border: 1px solid rgba(242,139,130,0.15);
+  border-radius: 14px; padding: 14px 28px; width: 520px;
+}
+.problem-item svg { width: 22px; height: 22px; color: #f28b82; flex-shrink: 0; }
+.problem-item span { font-size: 20px; color: #d4d4d8; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="content">
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+  </div>
+  <h1>Perdendo clientes<br>sem perceber?</h1>
+  <div class="problems">
+    <div class="problem-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <span>Clientes ligando pra agendar</span>
+    </div>
+    <div class="problem-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <span>Agenda bagunçada no papel</span>
+    </div>
+    <div class="problem-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <span>30% de faltas sem lembrete</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

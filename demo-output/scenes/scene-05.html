@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Scene 05 - Social Proof</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1920px; height: 1080px;
+  background: #0d0e12;
+  font-family: 'Inter', sans-serif;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.bg-glow {
+  position: absolute; width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(251,191,36,0.1) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+.content { text-align: center; z-index: 1; }
+.big-icon {
+  width: 80px; height: 80px; border-radius: 20px;
+  background: rgba(251,191,36,0.15);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.big-icon svg { width: 40px; height: 40px; color: #fbbf24; }
+h1 {
+  font-size: 64px; font-weight: 800; color: #fff; line-height: 1.15;
+  margin-bottom: 12px;
+}
+h1 span { color: #fbbf24; }
+.sub {
+  font-size: 24px; color: #a1a1aa; margin-bottom: 40px;
+}
+.benefits {
+  display: flex; gap: 24px; justify-content: center;
+}
+.benefit {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px; padding: 20px 32px; text-align: center;
+}
+.benefit .num { font-size: 36px; font-weight: 800; color: #22c55e; }
+.benefit p { font-size: 14px; color: #a1a1aa; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="content">
+  <div class="big-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h1>Comece de graça.<br><span>Sem risco.</span></h1>
+  <p class="sub">14 dias grátis — sem cartão de crédito. Cancele quando quiser.</p>
+  <div class="benefits">
+    <div class="benefit">
+      <div class="num">14</div>
+      <p>Dias grátis</p>
+    </div>
+    <div class="benefit">
+      <div class="num">0</div>
+      <p>Sem cartão</p>
+    </div>
+    <div class="benefit">
+      <div class="num">30s</div>
+      <p>Pra começar</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

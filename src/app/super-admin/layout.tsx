@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Store,
@@ -69,7 +70,7 @@ function SuperAdminLayoutInner({ children }: { children: React.ReactNode }) {
       } lg:relative lg:translate-x-0`}>
         <div className="p-5 border-b border-zinc-800 flex items-center justify-between">
           <Link href="/super-admin" className="flex items-center gap-2.5">
-            <img src="/logo-barber-plan.png" alt="BarberPlan" className="w-8 h-8 rounded-lg object-cover" />
+            <Image src="/logo-barber-plan.png" alt="BarberPlan" width={32} height={32} className="w-8 h-8 rounded-lg object-cover" />
             <div>
               <span className="text-base font-bold text-white">BarberPlan</span>
               <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Super Admin</p>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ScissorsIcon, BarberPole, Comb, Mustache } from "@/components/barber-icons";
 import {
   LayoutDashboard,
@@ -90,7 +91,7 @@ export default function TenantAdminLayout({ children }: { children: React.ReactN
       } lg:relative lg:translate-x-0`}>
         <div className="p-5 border-b border-zinc-800 flex items-center justify-between">
           <Link href={basePath} className="flex items-center gap-2.5">
-            <img src="/logo-barber-plan.png" alt="BarberPlan" className="w-8 h-8 rounded-lg object-cover" />
+            <Image src="/logo-barber-plan.png" alt="BarberPlan" width={32} height={32} className="w-8 h-8 rounded-lg object-cover" />
             <div>
               <span className="text-base font-bold text-white">BarberPlan</span>
               <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Admin</p>

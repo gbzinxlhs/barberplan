@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Scene 02 - Login</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1920px;height:1080px;background:#09090b;font-family:'Inter',system-ui,sans-serif;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.card{background:#18181b;border:1px solid #27272a;border-radius:24px;padding:48px;max-width:480px;width:100%}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.top-avatar{width:48px;height:48px;border-radius:12px;background:#22c55e;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#09090b}
+.top-name{font-size:20px;font-weight:700;color:#fff}
+h2{font-size:24px;font-weight:700;color:#fff;margin-bottom:8px}
+.sub{font-size:15px;color:#a1a1aa;margin-bottom:28px}
+.field{margin-bottom:20px}
+label{display:block;font-size:13px;color:#71717a;margin-bottom:6px;font-weight:500}
+input{width:100%;background:#27272a;border:1px solid #3f3f46;border-radius:14px;padding:14px 18px;color:#fff;font-size:15px;outline:none}
+input::placeholder{color:#52525b}
+.btn{width:100%;background:#22c55e;color:#09090b;padding:14px;border-radius:14px;font-size:15px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn svg{width:18px;height:18px}
+.footer{text-align:center;margin-top:16px}
+.footer a{color:#52525b;font-size:13px;text-decoration:none}
+.flex{display:flex;gap:12px;margin-bottom:20px}
+.sim-input{flex:1;background:#27272a;border:2px solid #22c55e;border-radius:14px;padding:14px 18px;color:#fff;font-size:15px;outline:none}
+.sim-input::placeholder{color:#52525b}
+.sim-btn{background:#22c55e;color:#09090b;padding:14px 24px;border-radius:14px;font-size:15px;font-weight:600;border:none;cursor:pointer}
+</style></head><body>
+<div class="card">
+  <div class="top">
+    <div class="top-avatar">V</div>
+    <div class="top-name">Vintage Club</div>
+  </div>
+  <h2>Bem-vindo de volta! 👋</h2>
+  <p style="color:#a1a1aa;font-size:15px;margin-bottom:24px">Confirme seus dados para agendar</p>
+  <div class="field">
+    <label>Nome</label>
+    <input type="text" value="Gabriel Santos" style="border-color:#22c55e" readonly>
+  </div>
+  <div class="field">
+    <label>WhatsApp</label>
+    <input type="tel" value="(85) 99999-1234" style="border-color:#22c55e" readonly>
+  </div>
+  <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Entrar e Agendar</button>
+  <div class="footer"><a href="#">Meus Agendamentos</a></div>
+</div>
+<div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);color:#52525b;font-size:14px;font-family:'Inter',sans-serif">Acesse barberplan-nine.vercel.app/demo</div>
+</body></html>

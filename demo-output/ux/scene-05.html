@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Scene 05 - Date & Time</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1920px;height:1080px;background:#09090b;font-family:'Inter',system-ui,sans-serif;overflow:hidden;padding:40px 80px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:0 0 20px 0;border-bottom:1px solid #27272a;margin-bottom:32px}
+.header-left{display:flex;align-items:center;gap:12px}
+.avatar{width:36px;height:36px;border-radius:10px;background:#22c55e;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#09090b}
+.header-name{font-size:18px;font-weight:700;color:#fff}
+.steps{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+.step{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.step.active{background:#22c55e;color:#09090b}
+.step.inactive{background:#27272a;color:#52525b}
+.step-line{flex:1;height:2px;background:#22c55e;border-radius:1px}
+.step-line.inactive{background:#27272a}
+.title{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.title svg{width:22px;height:22px;color:#22c55e}
+.title h2{font-size:24px;font-weight:700;color:#fff}
+.dates{display:flex;gap:12px;margin-bottom:32px}
+.date-card{width:80px;padding:14px 8px;border-radius:14px;text-align:center;background:#18181b;border:1px solid #27272a;cursor:pointer}
+.date-card.active{background:#22c55e;border-color:#22c55e}
+.date-card.active .dow,.date-card.active .dnum,.date-card.active .dmon{color:#09090b}
+.dow{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#a1a1aa;margin-bottom:4px}
+.dnum{font-size:20px;font-weight:700;color:#fff;margin-bottom:2px}
+.dmon{font-size:10px;color:#52525b}
+.date-card.closed{opacity:.4;cursor:not-allowed}
+.times{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:500px}
+.slot{padding:12px;border-radius:10px;text-align:center;font-size:15px;background:#18181b;border:1px solid #27272a;color:#a1a1aa;cursor:pointer}
+.slot.active{background:#22c55e;border-color:#22c55e;color:#09090b;font-weight:600}
+.slot.booked{background:#18181b;color:#3f3f46;text-decoration:line-through;cursor:not-allowed;border-color:#27272a}
+.footer{display:flex;justify-content:space-between;align-items:center;margin-top:40px}
+.back{display:flex;align-items:center;gap:6px;color:#52525b;font-size:14px;cursor:pointer;background:none;border:none}
+.back:hover{color:#fff}
+.continue-btn{background:#22c55e;color:#09090b;padding:12px 32px;border-radius:12px;font-size:15px;font-weight:600;border:none;cursor:pointer}
+</style></head><body>
+<div class="header">
+  <div class="header-left">
+    <div class="avatar">V</div>
+    <div class="header-name">Vintage Club</div>
+  </div>
+</div>
+<div class="steps">
+  <div class="step active">&#10003;</div>
+  <div class="step-line"></div>
+  <div class="step active">&#10003;</div>
+  <div class="step-line"></div>
+  <div class="step active">3</div>
+  <div class="step-line"></div>
+  <div class="step inactive">4</div>
+  <div class="step-line inactive"></div>
+  <div class="step inactive">5</div>
+</div>
+<div class="title">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+  <h2>Data e Horario</h2>
+</div>
+<div class="dates">
+  <div class="date-card closed"><div class="dow" style="color:#3f3f46">DOM</div><div class="dnum" style="color:#3f3f46">06</div><div class="dmon" style="color:#3f3f46">Jul</div></div>
+  <div class="date-card"><div class="dow">SEG</div><div class="dnum">07</div><div class="dmon">Jul</div></div>
+  <div class="date-card active"><div class="dow">TER</div><div class="dnum">08</div><div class="dmon">Jul</div></div>
+  <div class="date-card"><div class="dow">QUA</div><div class="dnum">09</div><div class="dmon">Jul</div></div>
+  <div class="date-card"><div class="dow">QUI</div><div class="dnum">10</div><div class="dmon">Jul</div></div>
+  <div class="date-card"><div class="dow">SEX</div><div class="dnum">11</div><div class="dmon">Jul</div></div>
+</div>
+<p style="color:#52525b;font-size:13px;margin-bottom:12px">Barbeiro: Ricardo Menezes — Servico: Corte Degrade</p>
+<div class="times">
+  <div class="slot">08:00</div>
+  <div class="slot">08:30</div>
+  <div class="slot">09:00</div>
+  <div class="slot booked">09:30</div>
+  <div class="slot">10:00</div>
+  <div class="slot">10:30</div>
+  <div class="slot active">11:00</div>
+  <div class="slot">11:30</div>
+  <div class="slot">13:00</div>
+  <div class="slot">13:30</div>
+  <div class="slot">14:00</div>
+  <div class="slot booked">14:30</div>
+  <div class="slot">15:00</div>
+  <div class="slot">15:30</div>
+  <div class="slot">16:00</div>
+  <div class="slot">16:30</div>
+  <div class="slot">17:00</div>
+  <div class="slot">17:30</div>
+  <div class="slot">18:00</div>
+  <div class="slot">18:30</div>
+</div>
+<div class="footer">
+  <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Voltar</button>
+  <button class="continue-btn">Continuar</button>
+</div>
+</body></html>

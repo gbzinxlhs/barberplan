@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Scene 01 - Hook</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1920px; height: 1080px;
+  background: #0d0e12;
+  font-family: 'Inter', sans-serif;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.bg-glow {
+  position: absolute; width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(124,106,245,0.15) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+.logo {
+  position: absolute; top: 40px; left: 50px;
+  display: flex; align-items: center; gap: 12px;
+}
+.logo-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: #22c55e; display: flex; align-items: center; justify-content: center;
+}
+.logo-icon svg { width: 22px; height: 22px; color: #09090b; }
+.logo-text { font-size: 24px; font-weight: 800; color: #fff; }
+.logo-text span { color: #22c55e; }
+.content { text-align: center; z-index: 1; }
+.badge {
+  display: inline-block; padding: 8px 18px; border-radius: 999px;
+  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3);
+  font-size: 14px; font-weight: 600; color: #22c55e; margin-bottom: 24px;
+}
+h1 {
+  font-size: 72px; font-weight: 800; color: #fff; line-height: 1.1;
+  margin-bottom: 20px;
+}
+h1 span { color: #22c55e; }
+p {
+  font-size: 26px; color: #a1a1aa; font-weight: 400; max-width: 700px; margin: 0 auto;
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="logo">
+  <div class="logo-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3L12 9L18 3M12 9V21"/></svg>
+  </div>
+  <div class="logo-text">Barber<span>Plan</span></div>
+</div>
+<div class="content">
+  <div class="badge">🚀 Sistema completo para barbearias</div>
+  <h1>Sua barbearia no<br><span>piloto automático</span></h1>
+  <p>Agendamento online, gestão de clientes,<br>controle financeiro e lembretes via WhatsApp.</p>
+</div>
+</body>
+</html>
