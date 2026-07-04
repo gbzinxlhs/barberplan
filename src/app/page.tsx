@@ -276,9 +276,7 @@ function HomeContent() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between relative z-10">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center relative overflow-hidden shadow-lg shadow-primary/25">
-              <ScissorsIcon className="size-4.5 text-primary-foreground" />
-            </div>
+            <img src="/logo-barber-plan.png" alt="BarberPlan" className="w-9 h-9 rounded-xl object-cover shadow-lg shadow-primary/25" />
             <div>
               <span className="text-lg font-bold text-white">Barber</span>
               <span className="text-lg font-bold text-primary">Plan</span>
@@ -738,9 +736,7 @@ function HomeContent() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500 relative z-10">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
-              <ScissorsIcon className="size-3 text-primary-foreground" />
-            </div>
+            <img src="/logo-barber-plan.png" alt="BarberPlan" className="w-6 h-6 rounded object-cover" />
             <span className="font-semibold text-white">Barber<span className="text-primary">Plan</span></span>
           </div>
           <p>&copy; 2026 BarberPlan. Todos os direitos reservados.</p>
