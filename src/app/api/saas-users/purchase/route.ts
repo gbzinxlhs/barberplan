@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createDefaultWorkingHours } from "@/lib/working-hours";
 import { signSaasToken, setSaasTokenCookie } from "@/lib/auth-saas";
+import crypto from "crypto";
 
 function generateSlug(name: string, surname: string): string {
   const base = `${name}-${surname}`
@@ -9,7 +10,7 @@ function generateSlug(name: string, surname: string): string {
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  const suffix = Math.random().toString(36).substring(2, 6);
+  const suffix = crypto.randomBytes(4).toString("hex");
   return `${base}-${suffix}`;
 }
 

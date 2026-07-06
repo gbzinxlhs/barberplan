@@ -1,8 +1,18 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "super-admin-secret-change-in-production";
-const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "admin@barberplan.com";
-const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "admin123";
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
+if (!process.env.SUPER_ADMIN_EMAIL) {
+  throw new Error("SUPER_ADMIN_EMAIL environment variable is required");
+}
+if (!process.env.SUPER_ADMIN_PASSWORD) {
+  throw new Error("SUPER_ADMIN_PASSWORD environment variable is required");
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL;
+const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD;
 
 export function getSuperAdminCredentials() {
   return { email: SUPER_ADMIN_EMAIL, password: SUPER_ADMIN_PASSWORD };

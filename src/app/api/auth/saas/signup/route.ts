@@ -49,6 +49,7 @@ export async function POST(request: Request) {
     setSaasTokenCookie(response, token);
     return response;
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Erro ao criar conta" }, { status: 500 });
+    console.error("Signup error:", err);
+    return NextResponse.json({ error: "Erro ao criar conta" }, { status: 500 });
   }
 }

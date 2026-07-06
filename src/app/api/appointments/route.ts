@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppIfPro, formatDateTime } from "@/lib/whatsapp";
+import { getAuthUser } from "@/lib/auth-saas";
 
 export async function POST(request: Request) {
+  const auth = await getAuthUser();
+  if (!auth) {
+    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const {
@@ -104,12 +110,17 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+  const auth = await getAuthUser();
+  if (!auth) {
+    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const tenantSlug = searchParams.get("tenant");
   const date = searchParams.get("date");
   const barberId = searchParams.get("barberId");
   const page = parseInt(searchParams.get("page") || "1", 10);
-  const pageSize = parseInt(searchParams.get("pageSize") || "20", 10);
+  const pageSize = Math.min(parseInt(searchParams.get("pageSize") || "20", 10), 100);
 
   if (!tenantSlug) {
     return NextResponse.json({ error: "Tenant slug required" }, { status: 400 });

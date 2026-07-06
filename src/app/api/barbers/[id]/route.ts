@@ -20,7 +20,16 @@ export async function PATCH(
   }
 
   const body = await request.json();
-  const barber = await prisma.barber.update({ where: { id }, data: body });
+  const allowedFields = {
+    name: body.name,
+    bio: body.bio,
+    photo: body.photo,
+    active: body.active,
+  };
+  const filteredData = Object.fromEntries(
+    Object.entries(allowedFields).filter(([_, v]) => v !== undefined)
+  );
+  const barber = await prisma.barber.update({ where: { id }, data: filteredData });
   return NextResponse.json({ barber });
 }
 

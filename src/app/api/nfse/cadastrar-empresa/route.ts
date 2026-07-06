@@ -56,6 +56,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, tenant: updated });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Erro ao cadastrar empresa" }, { status: 500 });
+    console.error("NFS-e cadastrar empresa error:", error);
+    return NextResponse.json({ error: "Erro ao cadastrar empresa" }, { status: 500 });
   }
 }

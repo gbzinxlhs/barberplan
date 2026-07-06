@@ -12,5 +12,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Token inválido ou expirado" }, { status: 401 });
   }
 
+  if (payload.role !== "super_admin") {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
   return NextResponse.json({ user: payload });
 }

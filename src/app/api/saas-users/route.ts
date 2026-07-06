@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth-saas";
 
 export async function POST(request: Request) {
+  const auth = await getAuthUser();
+  if (!auth) {
+    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  }
+
   const body = await request.json();
   const { name, surname, email, phone } = body;
 
@@ -27,6 +33,11 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+  const auth = await getAuthUser();
+  if (!auth) {
+    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const email = searchParams.get("email");
 

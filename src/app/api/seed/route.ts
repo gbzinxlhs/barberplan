@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
+import { requireSuperAdmin } from "@/lib/api-auth";
 
 export async function GET() {
+  const { error, user } = await requireSuperAdmin();
+  if (error) return error;
+
   try {
     const { Pool } = await import("pg");
 
@@ -76,9 +80,9 @@ export async function GET() {
 
     return NextResponse.json({ message: "Tenant criado com sucesso!", db_ok: testOk === 1 });
   } catch (error: any) {
+    console.error("Seed error:", error);
     return NextResponse.json({
-      error: error?.message || "Erro desconhecido",
-      code: error?.code,
+      error: "Erro ao executar seed",
     }, { status: 500 });
   }
 }

@@ -48,6 +48,7 @@ export async function POST(request: Request) {
     setSaasTokenCookie(response, token);
     return response;
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Erro ao fazer login" }, { status: 500 });
+    console.error("Login error:", err);
+    return NextResponse.json({ error: "Erro ao fazer login" }, { status: 500 });
   }
 }

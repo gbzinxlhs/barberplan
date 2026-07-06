@@ -3,8 +3,10 @@ import crypto from "crypto";
 const ALGORITHM = "aes-256-cbc";
 
 function getSecret(): Buffer {
-  const raw = process.env.CERTIFICATE_SECRET || "barberplan-nfse-default-secret-change-me";
-  return crypto.createHash("sha256").update(raw).digest();
+  if (!process.env.CERTIFICATE_SECRET) {
+    throw new Error("CERTIFICATE_SECRET environment variable is required");
+  }
+  return crypto.createHash("sha256").update(process.env.CERTIFICATE_SECRET).digest();
 }
 
 export function encrypt(text: string): string {

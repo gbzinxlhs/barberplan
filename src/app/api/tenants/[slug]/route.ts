@@ -7,7 +7,20 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const tenant = await prisma.tenant.findUnique({ where: { slug } });
+  const tenant = await prisma.tenant.findUnique({
+    where: { slug },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      phone: true,
+      whatsapp: true,
+      address: true,
+      instagram: true,
+      primaryColor: true,
+      logo: true,
+    },
+  });
 
   if (!tenant) {
     return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
@@ -50,6 +63,18 @@ export async function PATCH(
   }
 
   const body = await request.json();
-  const updated = await prisma.tenant.update({ where: { slug }, data: body });
+  const allowedFields = {
+    name: body.name,
+    phone: body.phone,
+    whatsapp: body.whatsapp,
+    address: body.address,
+    instagram: body.instagram,
+    primaryColor: body.primaryColor,
+    logo: body.logo,
+  };
+  const filteredData = Object.fromEntries(
+    Object.entries(allowedFields).filter(([_, v]) => v !== undefined)
+  );
+  const updated = await prisma.tenant.update({ where: { slug }, data: filteredData });
   return NextResponse.json({ tenant: updated });
 }
